@@ -1,3 +1,5 @@
+import random
+
 # define a graph class to represent directed graphs
 class Graph:
 
@@ -92,3 +94,30 @@ class Graph:
             s = s + "\n"
 
         return s
+
+# creates a graph on n nodes and adds each edge with probability p, but no self loops
+def generate_graph_uniformly(n, p):
+
+    # create a graph G with all the edges and a stack S of all the edges
+    G = Graph(n)
+    S = []
+
+    for i in range(n):
+        for j in range(n):
+            if i is not j:
+                r = random.uniform(0,1)
+                if r <= p:
+                    G.add_edge(i, j, False)
+                    S.append((i,j))
+    return (G,S)
+
+# creates a graph of size n from a list of edges
+def induce_graph(S, n):
+
+    G = Graph(n)
+
+    for i in range(len(S)):
+        (u,v) = S[i]
+        G.add_edge(u,v)
+
+    return G

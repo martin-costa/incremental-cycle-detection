@@ -1,20 +1,6 @@
-# python script to run and test incremental cycle detection algorithms
+# python program to test incremental cycle detection algorithms
 from graphs import *
-import random
 import math
-
-# creates a graph on n nodes and adds each edge with probability p
-def generate_graph_uniformly(n, p):
-
-    G = Graph(n)
-
-    for i in range(n):
-        for j in range(n):
-            if i is not j:
-                r = random.uniform(0,1)
-                if r <= p:
-                    G.add_edge(i, j, False)
-    return G
 
 class BFG09:
 
@@ -28,7 +14,7 @@ class BFG09:
         self.G = Graph(n)
 
         # L[u] stores the label of u
-        self.L = []
+        self.L = [0]*self.n
 
         # N[u][j] is a counter bounded by 2**(j+2)
         self.N = []
@@ -41,21 +27,38 @@ class BFG09:
 
         # initailise all entries of N and M to 0
         for u in range(self.n):
-            self.N.append([0]*self.lg_n)
-            self.M.append([0]*self.lg_n)
+            self.N.append([0]*(self.lg_n+1))
+            self.M.append([0]*(self.lg_n+1))
 
-        # initailise all entries of L to 0
-        self.L = [0]*self.n
+        # stores nodes visited while following edgea after an insertion
+        self.visited = set()
+        self.acyclic = True
 
     # insert the edge (u,v) into the DAG
     def insert(self, u, v):
+
+        # initailize the cache of v along this edge to 0
         self.cache[(u,v)] = 0
+
+        # add the inserted edge to the graph
         self.G.add_edge(u,v)
-        self.FOLLOW(u,v)
+
+        self.visited = {u}
+
+        # follow the edge and update labels where necessary
+        return self.FOLLOW(u,v)
 
     # FOLLOW algorithm implementation to update labels and maintain a topological ordering
     def FOLLOW(self, u, v):
 
+        # overhead to detect cycles without increasing (asymptotic) runtime
+        # checks for cylces and stops following edges when a cycle is detected
+        if not self.acyclic or v in self.visited:
+            self.acyclic = False
+            return False
+        self.visited.add(v)
+
+        # store the value of the label of v
         l_v = self.L[v]
 
         if self.L[u] >= self.L[v]:
@@ -66,7 +69,7 @@ class BFG09:
             j = math.ceil(math.log2(self.L[v] - self.L[u]))
             self.N[v][j] = self.N[v][j] + 1
             if self.N[v][j] == 2**(j + 2):
-                self.L[v] = math.max(self.L[v], self.M[v][j] + 2**j)
+                self.L[v] = max(self.L[v], self.M[v][j] + 2**j)
                 self.N[v][j] = 0
                 self.M[v][j] = self.L[v]
 
@@ -74,11 +77,19 @@ class BFG09:
         if self.L[v] > l_v:
             for w in self.G.adj_list[v]:
                 if self.cache[(v,w)] <= self.L[v]:
-                    self.FOLLOW(v,w)
+
+                    # return false if a cycle is detected
+                    if not self.FOLLOW(v,w):
+                        return False
 
         # done following the edge (u,v)
         self.cache[(u,v)] = self.L[v]
         self.G.add_edge(u,v)
+
+        self.visited.remove(v)
+
+        # returns true when no cycles have been detected
+        return True
 
     # checks that the labels correctly induce a topological ordering
     def check_labels(self):
