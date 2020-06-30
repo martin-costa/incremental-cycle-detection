@@ -1,4 +1,4 @@
-import random
+import numpy as np
 
 # define a graph class to represent directed graphs
 class Graph:
@@ -102,10 +102,10 @@ def generate_graph_uniformly(n, p):
     G = Graph(n)
     S = []
 
-    for i in range(n):
-        for j in range(n):
-            if i is not j:
-                r = random.uniform(0,1)
+    for i in np.random.permutation(n):
+        for j in np.random.permutation(n):
+            if i != j:
+                r = np.random.uniform(0,1)
                 if r <= p:
                     G.add_edge(i, j, False)
                     S.append((i,j))

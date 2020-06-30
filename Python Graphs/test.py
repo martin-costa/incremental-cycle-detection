@@ -19,11 +19,21 @@ if __name__ == "__main__":
     #
     # print(icd.check_labels())
 
-    n = 12
-    p = 0.04
+    A = [1,2,3]
 
-    H = generate_graph_uniformly(12, 0.04)
-    print("expected m = " + str(n*(n-1)*0.04))
+
+    A.insert(0,4)
+
+    print(A)
+
+    n = 12
+    p = 0.1
+
+    (H,S) = generate_graph_uniformly(n, p)
+
+    print(S)
+
+    print("expected m = " + str(n*(n-1)*p))
     print(H)
 
     G = Graph(6)
