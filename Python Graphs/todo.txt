@@ -1,0 +1,11 @@
+- fix data structures/runtime of certain parts of the program
+    - use linked lists, require O(1) append time for 2 lists, not possible with
+      pythons array implementation (amortized O(n) insertion time for n items
+      means that this is probably the only issue caused by this)
+    - ensure that array and set runtimes are working correctly (unsure of
+      implementation used by python)
+
+- finish ICD testing function for some set of edges and any algorithm
+
+- work on efficient digraph generation with control over density and size or
+  come up with some other method to test the algorithms

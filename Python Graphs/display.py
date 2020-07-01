@@ -1,9 +1,9 @@
-# a python program to visualize graphs
 from graphs import Graph
 import matplotlib.pyplot as plt
 import matplotlib
 import math
 
+# a python program to visualize graphs
 def draw_graph(G):
 
     n = G.n
@@ -27,6 +27,7 @@ def draw_graph(G):
 
     plt.plot(nodes_x, nodes_y, 'o',markersize=15, color='red', alpha=0.7)
 
+    # draw all of the arrows
     for u in range(n):
         for v in G.adj_list[u]:
 

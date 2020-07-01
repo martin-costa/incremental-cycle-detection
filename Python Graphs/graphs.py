@@ -1,6 +1,6 @@
 import numpy as np
 
-# define a graph class to represent directed graphs
+# define a graph class to represent directed graphs using an adjacency list
 class Graph:
 
     def __init__(self, n):
@@ -112,12 +112,12 @@ def generate_graph_uniformly(n, p):
     return (G,S)
 
 # creates a graph of size n from a list of edges
-def induce_graph(S, n):
+def induce_graph(S, n, check=True):
 
     G = Graph(n)
 
     for i in range(len(S)):
         (u,v) = S[i]
-        G.add_edge(u,v)
+        G.add_edge(u, v, check=check)
 
     return G

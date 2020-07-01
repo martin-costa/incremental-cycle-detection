@@ -1,2 +1,3 @@
-# algorithmic-graph-theory
-Code that I will use during my 3rd year project
+# Incremental Cycle Detection
+
+Implementations of algorithms for incremental cycle detection and topological ordering
