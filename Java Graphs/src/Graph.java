@@ -1,5 +1,3 @@
-package graphs;
-
 import java.util.*;
 
 // these classes were made to run and test specific algorithms, so their
@@ -9,18 +7,6 @@ import java.util.*;
 
 // stores a graph object
 public class Graph {
-
-  // edge class to be used in algorithms
-  class Edge {
-
-    int l;
-    int r;
-
-    Edge(int l, int r) {
-      this.l = l;
-      this.r = r;
-    }
-  }
 
   // the number of nodes
   private int n;
@@ -48,6 +34,51 @@ public class Graph {
     if (u < 0 || u >= n || v < 0 || v >= n || adjList[u].contains(v)) return;
     m++;
     adjList[u].add(v);
+  }
+
+  // perform a DFS only visiting nodes in the set E starting from all nodes in start
+  public void restrictedDFS(HashSet<Integer> start, HashSet<Integer> E, HashSet<Integer> F) {
+    if (!E.contains(start)) return;
+
+    // start exploring from all nodes in start
+    for (int s : start) {
+      if (!F.contains(s)) {
+        restrictedDFS(s, E, F);
+      }
+    }
+  }
+
+  // perform a DFS only visiting nodes in the set E starting from s
+  public void restrictedDFS(int s, HashSet<Integer> E, HashSet<Integer> F) {
+    if (!E.contains(s)) return;
+
+    // maintains path from s to node being explored
+    Stack<Edge> P = new Stack<Edge>();
+
+    // edges to be explored
+    Stack<Edge> S = new Stack<Edge>();
+
+    S.push(new Edge(s,s));
+
+    while(!S.empty()) {
+      Edge e = S.pop();
+
+      int x = e.l, y = e.r;
+
+      // visit node y if not yet visited
+      if (!F.contains(y)) {
+        F.add(y);
+        P.push(e);
+        for (int z : adjList[y]) {
+          if (E.contains(z) && !F.contains(z)) S.push(new Edge(y,z));
+        }
+      }
+
+      // backtrack if necessary
+      while((!S.empty() && S.peek().l != P.peek().r) || (S.empty() && !P.empty())) {
+        P.pop();
+      }
+    }
   }
 
   // perform DFS starting at s returns DFS numbering

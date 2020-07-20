@@ -30,6 +30,15 @@ class Graph:
         self.adj_list[u].append(v)
         return True
 
+    def remove_edge(self, u, v, check=True):
+        if check:
+            if u < 0 or u >= self.n or v < 0 or v >= self.n or self.adj_list[u].count(v) == 0:
+                return False
+
+        self.m = self.m - 1
+        self.adj_list[u].remove(v)
+        return True
+
     # run DFS on G starting at u, keeping the pre and post numbers
     def DFS(self, u=None, pre=None, post=None):
 
@@ -96,7 +105,7 @@ class Graph:
         return s
 
 # creates a graph on n nodes and adds each edge with probability p, but no self loops
-def generate_graph_uniformly(n, p):
+def generate_graph_uniformly(n, p, acyclic=False):
 
     # create a graph G with all the edges and a stack S of all the edges
     G = Graph(n)
@@ -108,7 +117,14 @@ def generate_graph_uniformly(n, p):
                 r = np.random.uniform(0,1)
                 if r <= p:
                     G.add_edge(i, j, False)
-                    S.append((i,j))
+
+                    if acyclic:
+                        if G.is_acyclic():
+                            S.append((i,j))
+                        else:
+                            G.remove_edge(i, j, False)
+                    else:
+                        S.append((i,j))
     return (G,S)
 
 # creates a graph of size n from a list of edges

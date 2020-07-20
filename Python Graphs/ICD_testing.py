@@ -5,7 +5,6 @@ from graphs import *
 # function to test icremental cycle detection algorithm A on a randomly
 # generated digraph of density p on n nodes
 def ICD_algorithm_test(A, n, p):
-
     return False
 
 def BFG09_GEN_TEST(N, n, p, print_results=True):
