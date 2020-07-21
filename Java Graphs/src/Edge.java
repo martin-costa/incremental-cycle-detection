@@ -8,4 +8,8 @@ public class Edge {
     this.l = l;
     this.r = r;
   }
+
+  public String toString() {
+    return "(" + Integer.toString(l) + "," + Integer.toString(r) + ")";
+  }
 }

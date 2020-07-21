@@ -38,7 +38,7 @@ public class Graph {
 
   // perform a DFS only visiting nodes in the set E starting from all nodes in start
   public void restrictedDFS(HashSet<Integer> start, HashSet<Integer> E, HashSet<Integer> F) {
-    if (!E.contains(start)) return;
+    if (!E.containsAll(start)) return;
 
     // start exploring from all nodes in start
     for (int s : start) {
@@ -81,17 +81,32 @@ public class Graph {
     }
   }
 
+  // class to store DFS numberings
+  class DFSnumbering {
+
+    public int[] pre;
+    public int[] post;
+
+    public int i = 0;
+    public int j = 0;
+
+    public int n;
+
+    public DFSnumbering(int n) {
+      this.n = n;
+      this.pre = new int[n];
+      this.post = new int[n];
+    }
+  }
+
   // perform DFS starting at s returns DFS numbering
-  public int[] DFS(int s, boolean getpost) {
-    if (s < 0 || s >= n) return null;
+  public void DFS(int s, DFSnumbering numbering) {
+    if (s < 0 || s >= n) return;
 
     // create arrays for DFS numberings
-    int[] pre = new int[n];
-    int[] post = new int[n];
-    int i = 0, j = 0;
-
-    // keeps track of visited nodes
-    boolean[] visited = new boolean[n];
+    if (numbering == null || numbering.n < n) {
+      numbering = new DFSnumbering(n);
+    }
 
     // maintains path from s to node being explored
     Stack<Edge> P = new Stack<Edge>();
@@ -107,23 +122,106 @@ public class Graph {
       int x = e.l, y = e.r;
 
       // visit node y if not yet visited
-      if (!visited[y]) {
-        visited[y] = true;
+      if (numbering.pre[y] == 0) {
         P.push(e);
-        pre[y] = ++j;
+        numbering.pre[y] = ++numbering.j;
         for (int z : adjList[y]) {
-          if (!visited[z]) S.push(new Edge(y,z));
+          if (numbering.pre[z] == 0) S.push(new Edge(y,z));
         }
       }
 
       // backtrack if necessary
       while((!S.empty() && S.peek().l != P.peek().r) || (S.empty() && !P.empty())) {
-        post[P.pop().r] = ++i;
+        numbering.post[P.pop().r] = ++numbering.i;
+      }
+    }
+  }
+
+  // performs DFS over whole graph
+  public void DFS(DFSnumbering numbering) {
+
+    // create arrays for DFS numberings
+    if (numbering == null || numbering.n < n) {
+      numbering = new DFSnumbering(n);
+    }
+
+    for (int u = 0; u < n; u++) {
+      if (numbering.pre[u] == 0) {
+        DFS(u, numbering);
+      }
+    }
+  }
+
+  // checks if this graph is acyclic
+  public boolean isAcyclic() {
+
+    DFSnumbering numbering = new DFSnumbering(n);
+
+    // get DFS numberings of graph
+    DFS(numbering);
+
+    // note that inverse of post number defines a topological ordering on this
+    for (int u = 0; u < n; u++) {
+      for (Integer v : adjList[u]) {
+        // ensure (u,v) agrees with is
+        if (numbering.post[u] < numbering.post[v]) return false;
+      }
+    }
+    return true;
+  }
+
+  // get a stack of the edges in this graph
+  public ArrayList<Edge> getEdges() {
+
+    ArrayList<Edge> edges = new ArrayList<Edge>(m);
+
+    for (int u = 0; u < n; u++) {
+      for (Integer v : adjList[u]) {
+        edges.add(new Edge(u, v));
       }
     }
 
-    // returns either the postnumber or prenumber
-    return getpost ? post : pre;
+    java.util.Collections.shuffle(edges);
+    return edges;
+  }
+
+  // generates a DAG on n nodes
+  public static Graph generateDAG(int n, double p) {
+
+    Graph G = new Graph(n);
+    Random rnd = new Random();
+
+    // generate a random permutation
+    ArrayList<Integer> perm = new ArrayList<Integer>(n);
+    for (int i = 0; i < n; i++) {
+      perm.add(i);
+    }
+    java.util.Collections.shuffle(perm);
+
+    for (int i = 0; i < n; i++) {
+      for (int j = i+1; j < n; j++) {
+        if (rnd.nextDouble() < p) {
+          G.addEdge(perm.get(i), perm.get(j));
+        }
+      }
+    }
+    return G;
+  }
+
+  // generates graph on n nodes
+  public static Graph generateGraph(int n, double p) {
+
+    Graph G = new Graph(n);
+    Random rnd = new Random();
+
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        if (i != j && rnd.nextDouble() < p) {
+          G.addEdge(i, j);
+        }
+      }
+    }
+    return G;
   }
 
   // turns the graph into a string
