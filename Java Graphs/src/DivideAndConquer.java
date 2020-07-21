@@ -258,16 +258,10 @@ public class DivideAndConquer {
       return -1;
     }
 
-    // adds the sets A and B to the set of x
-    public void ADD(MetaNode x, HashSet<Integer> A, HashSet<Integer> B, ArrayList<Integer> orderA, ArrayList<Integer> orderB, Graph forward, Graph backward) {
+    // adds the sets A and B to the set of x, returns total recourse
+    public int ADD(MetaNode x, HashSet<Integer> A, HashSet<Integer> B, ArrayList<Integer> orderA, ArrayList<Integer> orderB, Graph forward, Graph backward) {
 
-      if (A.isEmpty() && B.isEmpty()) return;
-
-      //System.out.println(this);
-
-      HashSet<Integer> START = new HashSet<Integer>(); /////////////////////////////////////////////////////////////////////////////
-      START.addAll(A);
-      START.addAll(B);
+      if (A.isEmpty() && B.isEmpty()) return 0;
 
       // STEP 1: BASE CASE
       if (x.isLeaf()) {
@@ -283,7 +277,7 @@ public class DivideAndConquer {
         newOrder.addAll(orderB);
 
         x.updateSet(newSet, newOrder);
-        return;
+        return A.size() + B.size();
       }
 
       // STEP 2: RECURSIVE CALL
@@ -393,34 +387,11 @@ public class DivideAndConquer {
       orderFB.retainAll(FB);
       orderRB.retainAll(RB);
 
-      HashSet<Integer> END = new HashSet<Integer>(); /////////////////////////////////////////////////////////////////////////////
-      END.addAll(LA);
-      END.addAll(LB);
-      END.addAll(FA);
-      END.addAll(FB);
-      END.addAll(RA);
-      END.addAll(RB);
-      if (!END.containsAll(START)) System.out.println("OOOOOOOOOPS!!");
+      int a = ADD(x.getLeft(), LA, LB, orderLA, orderLB, forward, backward);
+      int b = ADD(x.getMid(), FA, FB, orderFA, orderFB, forward, backward);
+      int c = ADD(x.getRight(), RA, RB, orderRA, orderRB, forward, backward);
 
-      // System.out.print(LA);
-      // System.out.print(LB);
-      // System.out.print(FA);
-      // System.out.print(FB);
-      // System.out.print(RA);
-      // System.out.print(RB);
-      // System.out.println("");
-      //
-      // System.out.print(orderLA);
-      // System.out.print(orderLB);
-      // System.out.print(orderFA);
-      // System.out.print(orderFB);
-      // System.out.print(orderRA);
-      // System.out.print(orderRB);
-      // System.out.println("");
-
-      ADD(x.getLeft(), LA, LB, orderLA, orderLB, forward, backward);
-      ADD(x.getMid(), FA, FB, orderFA, orderFB, forward, backward);
-      ADD(x.getRight(), RA, RB, orderRA, orderRB, forward, backward);
+      return a + b + c;
     }
 
     // X and Y disjoint, finds reach_G(X) and Y, and puts it in Z (only for the specific structure of these graphs!!!)
@@ -436,18 +407,20 @@ public class DivideAndConquer {
 
       found.retainAll(Y);
       Z.addAll(found);
+    }
 
-      // System.out.print("explore: ");
-      // System.out.print(explore);
-      // System.out.print("  ");
-      //
-      // System.out.print("search: ");
-      // System.out.print(Y);
-      // System.out.print("  ");
-      //
-      // System.out.print("found: ");
-      // System.out.print(found);
-      // System.out.println("");
+    // note: these depth methods are horrifyingly implemented :) only used for a little test tho
+    public int depth() {
+      return depth(root);
+    }
+
+    private int depth(MetaNode x) {
+      if (x.isLeaf()) return 0;
+
+      int a = depth(x.getLeft());
+      int b = depth(x.getMid());
+      int c = depth(x.getRight());
+      return 1 + Math.max(a, Math.max(b, c));
     }
 
     // to string method
@@ -494,6 +467,9 @@ public class DivideAndConquer {
 
   // amount of nodes
   private int n;
+
+  // total totalRecourse of algorithm
+  public int totalRecourse = 0;
 
   // maintains graph as edges are added
   private Graph forward;
@@ -551,7 +527,7 @@ public class DivideAndConquer {
         orderA.addAll(orderF);
         orderA.retainAll(A);
         z.getMid().removeFromSet(A);
-        T.ADD(z.getRight(), A, B, orderA, new ArrayList<Integer>(), forward, backward);
+        totalRecourse += T.ADD(z.getRight(), A, B, orderA, new ArrayList<Integer>(), forward, backward);
       }
       if (F.contains(u)) {
         backward.restrictedDFS(u, F, B);
@@ -559,14 +535,12 @@ public class DivideAndConquer {
         orderB.addAll(orderF);
         orderB.retainAll(B);
         z.getMid().removeFromSet(B);
-        T.ADD(z.getLeft(), A, B, new ArrayList<Integer>(), orderB, forward, backward);
+        totalRecourse += T.ADD(z.getLeft(), A, B, new ArrayList<Integer>(), orderB, forward, backward);
       }
 
       // break it down into an STP after if they are in same set
-      if (T.getMetaNode(u).equals(T.getMetaNode(v))) // ughhhhhhhhhhh??
+      if (T.getMetaNode(u).equals(T.getMetaNode(v)))
         type = 2;
-
-      //System.out.println(this);
     }
 
     //type 2 insertion: break down into further STP
@@ -586,6 +560,9 @@ public class DivideAndConquer {
 
       forward.restrictedDFS(v, S, R);
       backward.restrictedDFS(u, S, L);
+
+      totalRecourse += L.size(); // CAN BE IMPROVED
+      totalRecourse += R.size();
 
       // break down x into 3 children
       ArrayList<Integer> orderL = new ArrayList<Integer>();
@@ -619,6 +596,10 @@ public class DivideAndConquer {
 
   public boolean insert(Edge e) {
     return insert(e.l, e.r);
+  }
+
+  public int depth() {
+    return T.depth();
   }
 
   public String toString() {

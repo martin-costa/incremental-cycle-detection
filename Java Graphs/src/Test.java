@@ -60,21 +60,37 @@ class Test {
     //   }
     // }
 
-    int n = 30;
+    int n = 100;
 
-    for (int i = 0; i < 10000000; i++) {
-      Graph G = Graph.generateDAG(n, 0.5);
+    double c = 1;
+
+    double totalEdges = 0;
+
+    double totalRec = 0;
+
+    double p = 2*c/(n-1);
+
+    double avDepth = 0;
+
+    for (int i = 0; i < 100000; i++) {
+      Graph G = Graph.generateDAG(n, p);
       //System.out.println(G.isAcyclic());
 
       ArrayList<Edge> edges = G.getEdges();
 
       DivideAndConquer D = new DivideAndConquer(n);
 
-      if (i % 1000 == 0) System.out.println(i);
+    //  if (i % 1 == 0) System.out.println(i);
+
+      totalEdges += edges.size();
+
+      //System.out.println(totalEdges/(i + 1));
 
       HashSet<Edge> added = new HashSet<Edge>();
 
       ArrayList<Integer> order = D.getOrdering();
+
+      //System.out.println(D);
 
       for (Edge e : edges) {
         //System.out.println(e);
@@ -82,24 +98,21 @@ class Test {
         added.add(e);
         //System.out.println(D);
 
-        order = D.getOrdering();
-
-        for (Edge f : added) {
-          if (order.indexOf(f.l) >= order.indexOf(f.r)) {
-            System.out.println("AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
-            System.out.println(edges);
-            i = 10000000;
-          }
-        }
+        //order = D.getOrdering();
+        // for (Edge f : added) {
+        //   if (order.indexOf(f.l) >= order.indexOf(f.r)) {
+        //     System.out.println("AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
+        //     System.out.println(edges);
+        //     i = 10000000;
+        //   }
+        // }
       }
 
-      order = D.getOrdering();
+      avDepth += D.depth();
 
-      for (Edge e : edges) {
-        if (order.indexOf(e.l) >= order.indexOf(e.r)) {
-          System.out.println("AHHHHHH");
-        }
-      }
+      totalRec += D.totalRecourse;
+
+      System.out.println(D.totalRecourse);
     }
 
     // DivideAndConquer D = new DivideAndConquer(n);
