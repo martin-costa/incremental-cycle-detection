@@ -122,6 +122,7 @@ public class DivideAndConquer {
       // creates a random order
       ArrayList<Integer> order = new ArrayList<Integer>();
       order.addAll(set);
+      java.util.Collections.shuffle(order);
 
       // create the root node
       this.root = new MetaNode(set, order);
@@ -521,13 +522,15 @@ public class DivideAndConquer {
       HashSet<Integer> A = new HashSet<Integer>();
       HashSet<Integer> B = new HashSet<Integer>();
 
+      int recourse = 0;
+
       if (F.contains(v)) {
         forward.restrictedDFS(v, F, A);
         ArrayList<Integer> orderA = new ArrayList<Integer>();
         orderA.addAll(orderF);
         orderA.retainAll(A);
         z.getMid().removeFromSet(A);
-        totalRecourse += T.ADD(z.getRight(), A, B, orderA, new ArrayList<Integer>(), forward, backward);
+        recourse = T.ADD(z.getRight(), A, B, orderA, new ArrayList<Integer>(), forward, backward);
       }
       if (F.contains(u)) {
         backward.restrictedDFS(u, F, B);
@@ -535,8 +538,10 @@ public class DivideAndConquer {
         orderB.addAll(orderF);
         orderB.retainAll(B);
         z.getMid().removeFromSet(B);
-        totalRecourse += T.ADD(z.getLeft(), A, B, new ArrayList<Integer>(), orderB, forward, backward);
+        recourse = T.ADD(z.getLeft(), A, B, new ArrayList<Integer>(), orderB, forward, backward);
       }
+
+      totalRecourse += recourse;
 
       // break it down into an STP after if they are in same set
       if (T.getMetaNode(u).equals(T.getMetaNode(v)))
@@ -561,8 +566,12 @@ public class DivideAndConquer {
       forward.restrictedDFS(v, S, R);
       backward.restrictedDFS(u, S, L);
 
-      totalRecourse += L.size(); // CAN BE IMPROVED
-      totalRecourse += R.size();
+      int recourse = 0;
+
+      recourse += L.size(); // CAN BE IMPROVED
+      recourse += R.size();
+
+      totalRecourse += recourse;
 
       // break down x into 3 children
       ArrayList<Integer> orderL = new ArrayList<Integer>();

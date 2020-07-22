@@ -36,6 +36,13 @@ public class Graph {
     adjList[u].add(v);
   }
 
+  // removes an edge from the graph
+  public void removeEdge(int u, int v) {
+    if (u < 0 || u >= n || v < 0 || v >= n || !adjList[u].contains(v)) return;
+    m--;
+    adjList[u].remove(new Integer(v));
+  }
+
   // perform a DFS only visiting nodes in the set E starting from all nodes in start
   public void restrictedDFS(HashSet<Integer> start, HashSet<Integer> E, HashSet<Integer> F) {
     if (!E.containsAll(start)) return;
@@ -214,10 +221,20 @@ public class Graph {
     Graph G = new Graph(n);
     Random rnd = new Random();
 
+    // generate a random permutation
+    ArrayList<Integer> perm = new ArrayList<Integer>(n);
+    for (int i = 0; i < n; i++) {
+      perm.add(i);
+    }
+    java.util.Collections.shuffle(perm);
+
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < n; j++) {
         if (i != j && rnd.nextDouble() < p) {
-          G.addEdge(i, j);
+          G.addEdge(perm.get(i), perm.get(j));
+          if (!G.isAcyclic()) {
+            G.removeEdge(perm.get(i), perm.get(j));
+          }
         }
       }
     }
