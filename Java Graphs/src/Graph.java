@@ -44,7 +44,7 @@ public class Graph {
   }
 
   // perform a DFS only visiting nodes in the set E starting from all nodes in start
-  public void restrictedDFS(HashSet<Integer> start, HashSet<Integer> E, HashSet<Integer> F) {
+  public void restrictedDFS(Collection<Integer> start, Collection<Integer> E, Collection<Integer> F) {
     if (!E.containsAll(start)) return;
 
     // start exploring from all nodes in start
@@ -56,7 +56,7 @@ public class Graph {
   }
 
   // perform a DFS only visiting nodes in the set E starting from s
-  public void restrictedDFS(int s, HashSet<Integer> E, HashSet<Integer> F) {
+  public void restrictedDFS(int s, Collection<Integer> E, Collection<Integer> F) {
     if (!E.contains(s)) return;
 
     // maintains path from s to node being explored
