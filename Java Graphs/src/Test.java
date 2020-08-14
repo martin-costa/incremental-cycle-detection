@@ -6,7 +6,7 @@ class Test {
   // main method
   public static void main(String args[]) {
 
-    int n = 800;
+    int n = 400;
 
     int runs = 10;
 
@@ -32,6 +32,42 @@ class Test {
     double avDepth = 0;
 
     double avl2 = 0;
+
+    ArrayList<Edge> E = new ArrayList<Edge>(n);
+
+    // for (int i = 0; i < n-1; i++) {
+    //   E.add(new Edge(i, i+1));
+    // }
+    //E.add(new Edge(1, n-2));
+
+
+    for (int i = 0; i < n; i++) {
+      for (int j = i+1; j < n; j++) {
+        E.add(new Edge(i, j));
+      }
+    }
+
+    int l = 1;
+    int t = 0;
+
+    while(l < 100000) {
+      Collections.shuffle(E);
+
+      SimpleSearch D = new SimpleSearch(n);
+      D.setOneWay();
+      D.tracedNode = n-1;
+
+      for (Edge e : E) {
+        D.insert(e);
+      }
+
+      t += D.critical;
+
+      System.out.println(t/l);
+      l++;
+    }
+
+
 
     // int k = (int) Math.sqrt(5000);
     //

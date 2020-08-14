@@ -43,6 +43,22 @@ public class Graph {
     adjList[u].remove(new Integer(v));
   }
 
+  // can u reach v in G
+  public boolean canReach(int u, int v) {
+
+    HashSet<Integer> V = new HashSet<Integer>();
+    for (int i = 0; i < n; i++) {
+      V.add(i);
+    }
+
+    HashSet<Integer> F = new HashSet<Integer>();
+
+    restrictedDFS(u, V, F);
+
+    return F.contains(v);
+
+  }
+
   // perform a DFS only visiting nodes in the set E starting from all nodes in start
   public void restrictedDFS(Collection<Integer> start, Collection<Integer> E, Collection<Integer> F) {
     if (!E.containsAll(start)) return;

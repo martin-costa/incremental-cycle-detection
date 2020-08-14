@@ -22,6 +22,15 @@ public class SimpleSearch {
   // total recourse of algo
   private int totalRecourse = 0;
 
+  // total amount of critical insertions
+  public int critical = 0;
+
+  // total amount of right-critical insertions
+  public int rightCritical = 0;
+
+  // node to be traced
+  public int tracedNode = 0;
+
   // stores the order of the graph
   private ArrayList<Integer> order;
 
@@ -35,10 +44,18 @@ public class SimpleSearch {
     for (int i = 0; i < n; i++) {
       this.order.add(i);
     }
+    Collections.shuffle(this.order);
   }
 
   // handle an edge insertion
   public void insert(int u, int v) {
+
+    // check if a crit insertion for tracedNode has occured
+    if (forward.canReach(v, tracedNode)) {
+      if (!forward.canReach(u, tracedNode)) {
+        critical++;
+      }
+    }
 
     forward.addEdge(u, v);
     backward.addEdge(v, u);
@@ -63,6 +80,8 @@ public class SimpleSearch {
     // perform forwards and backwards searches
     backward.restrictedDFS(u, S, B);
     forward.restrictedDFS(v, S, F);
+
+    if (F.contains(tracedNode)) rightCritical++;
 
     // ONE WAY SEARCH:
     if (rearrageType == 3) {
