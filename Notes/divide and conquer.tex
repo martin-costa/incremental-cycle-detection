@@ -1,0 +1,230 @@
+\documentclass{article}
+
+% packages
+\usepackage[utf8]{inputenc}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{enumerate}
+
+% definitions and commands
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+
+\voffset = -20pt % defaults to 0pt
+\textheight = 581pt % defaults to 561pt
+\hoffset = -10pt % defaults to 0pt
+\textwidth = 375pt % defaults to 355pt
+
+\title{A Divide and Conquer Framework for Incremental Cycle Detection (Draft 1)}
+\author{Martin Costa}
+\date{July 2020}
+
+\begin{document}
+
+\maketitle
+
+% CHAPTER 1
+\section{Introduction}
+
+\subsection{Basic Definitions}
+
+In order to create a divide and conquer framework to the incremental cycle detection problem, we need to be able to recursively break down the problem into smaller sub-problems, leading to the following natural definition.
+
+% definition of a TP
+\begin{definition}[Topological Partition]
+Let $G=(V,E)$ be a DAG, then $(L,R)$ is a \textbf{topological partition} of G if
+\begin{enumerate}
+\item L and R partition V $(L \cap R = \varnothing$ and $L \cup R = V)$
+\item adding any edge from R to L will create a cycle
+\end{enumerate}
+\end{definition}
+
+This notion of topological partitions is too strict to be used directly; it is very easy to construct a DAG $G=(V,E)$ with $m=\Omega (n^{2})$ that has no non-trivial topological partitions. For example, suppose $u \in V$ and let $(L,R)$ be a partition of $V\setminus{\{u\}}$ with $\Theta(\vert L \vert)$ = $\Theta(\vert R \vert)$ = $\Theta(n)$ and $E = L \times R$. We can see that there can't be a topological partition of $G$ because $u$ is isolated in $G$, so adding any edge into the graph which is incident on $u$ would never create a cycle, even though $m=\Omega (n^{2})$.
+
+However, even though a topological partition doesn't exist for G, we can see (at least intuitively) that G is \textit{almost} partitioned topologically by $(L,R)$, so we should try and capture this formally.
+
+% definition of an STP
+\begin{definition}[Semi-Topological Partition]
+Let $G=(V,E)$ be a DAG, then $(L,F,R)$ is a \textbf{semi-topological partition} of $G$ with \textbf{freedom} $\frac{1}{n} \vert F \vert$ if
+\begin{enumerate}
+\item L, F and R partition V
+\item adding any edge from R to L will create a cycle
+\item there are no edges from F to L or from R to F $(\forall u \in F$, $u \notin reach_{G}^{-1}(L)$ and $u \notin reach_{G}(R))$
+\end{enumerate}
+\end{definition}
+
+We can see that $(L,R)$ is a topological partition (TP) of $G$ if, and only if, $(L,\varnothing,R)$ is a semi-topological partition (STP) of $G$.
+
+\subsection{Properties of STPs}
+
+We can now make some observations about the properties of STPs.
+
+\begin{proposition}
+Let $G=(V,E)$ be a DAG, given disjoint $L,R \subseteq V$, the following are equivalent
+\begin{enumerate}
+\item adding any edge from $R$ to $L$ will create a cycle
+\item $\forall u \in L$, $v \in R$ we have $v \in reach_{G}(u)$
+\item $L \subseteq \bigcap_{u \in R} reach_{G}^{-1}(u)$
+\item $R \subseteq \bigcap_{u \in L} reach_{G}(u)$
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+$\textbf{1.} \Leftrightarrow \textbf{2.}$ If adding any edge from $R$ to $L$ creates a cycle, then from any node in $L$ we can reach any node in $R$. If from any node in $L$ we can reach any node in $R$, then adding any edge $(v,u)$ from $R$ to $L$ will create a cycle, since we can append this edge to the end of a path from $u$ to $v$.
+
+$\textbf{2.} \Leftrightarrow \textbf{3.}$ and $\textbf{2.} \Leftrightarrow \textbf{4.}$ are obvious.
+\end{proof}
+
+\begin{proposition}
+Let $G=(V,E)$ be a DAG. Suppose $(L,F,R)$ is an STP of $G$, then
+\begin{enumerate}
+\item there are no edges from R to L
+\item $\forall u \in L$, $reach_{G}^{-1}(u) \subseteq L$
+\item $\forall u \in R$, $reach_{G}(u) \subseteq R$
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+\textbf{1.} Suppose there is an edge $(u,v)$ from $R$ to $L$ in $G$, by the definition of an STP, $G \cup \{(u,v)\}$ is not acyclic, but then $G=G \cup \{(u,v)\}$ is not acyclic, giving a contradiction. \textbf{2.} Suppose $u \in L$ and $v \in reach_{G}^{-1}(u)$, if $v \notin L$ then there is a path from $v \in F \cup R$ to $u$, hence there exists an edge from $F$ to $L$ or from $R$ to $L$ giving a contradiction, hence $reach_{G}^{-1}(u) \subseteq L$. \textbf{3.} Same argument as 2.
+\end{proof}
+
+This next proposition will be useful for finding STPs.
+\begin{proposition}
+Let $G=(V,E)$ be a DAG, let $u \in V$ and $v \in reach_{G}(u)$, then
+\begin{enumerate}
+\item if $u \neq v$ then $(reach_{G}^{-1}(u),F,reach_{G}(v))$ is an STP of $G$
+\item if $u = v$ then $(reach_{G}^{-1}(u),F,reach_{G}(u) \setminus{\{u\}})$ and $(reach_{G}^{-1}(u) \setminus{\{u\}},F,reach_{G}(u))$ are STPs of $G$
+\end{enumerate}
+with $F=V \setminus (reach_{G}^{-1}(u) \cup reach_{G}(v))$
+\end{proposition}
+
+\begin{proof}
+\textbf{1.} Let $L=reach_{G}^{-1}(u)$ and $R=reach_{G}(v)$. If $L \cap R \neq \varnothing$ then $u \in reach_{G}(v)$ so $G$ contains a cycle, contradicting the fact that $G$ is a DAG. So $L$, $F$ and $R$ partition $V$. If we add any edge $(v^{*},u^{*})$ from $R$ to $L$, since we can form paths from $u^{*} \rightsquigarrow u$, $u \rightsquigarrow v$ and $v \rightsquigarrow v^{*}$, we can append these paths together along with $(v^{*},u^{*})$ to obtain a cycle. Let $w \in F$ and suppose $w \in reach_{G}^{-1}(L) = reach_{G}^{-1}(u)$, then by the definition of $L$, $w \in L$, giving a contradiction, so there are no edges from $F$ to $L$. Similarly, there are no edges from $R$ to $F$. It follows that $(reach_{G}^{-1}(u),F,reach_{G}(v))$ is an STP of $G$.
+\textbf{2.} Same argument as 1.
+\end{proof}
+
+This next proposition is the main reason that the notion of STPs is useful for this problem. This is almost too obvious to state, but it's important so we say it explicitly anyway.
+
+\begin{proposition}
+Let $G=(V,E)$ be a DAG. Suppose $(L,F,R)$ is an STP of $G$ and that $\prec_{L}$, $\prec_{F}$ and $\prec_{R}$ are topological orderings of $G[L]$, $G[F]$ and $G[R]$ respectively. The ordering $\prec_{G}$ that we get from combining these topological orderings and setting $L \prec_{G} F \prec_{G} R$ is a topological ordering of $G$. Formally, given $u, v \in G$, if for some $S \in \{ L,F,R\}$ $u,v \in S$ then $u \prec_{G} v$ if $u \prec_{S} v$, else $u \prec_{G} v$ if $u \in L$ or if $u \in F$ and $v \in R$.
+\end{proposition}
+
+\begin{proof}
+Follows directly from the definition of a topological ordering combined with the definition of an STP and Proposition 1 part 1.
+\end{proof}
+
+% CHAPTER 2
+\section{Some Meta Trees...}
+
+\subsection{The Meta Tree}
+
+Let $G=(V,E)$ be a DAG with $E=\{e_{1},...,e_{n}\}$, we start with the DAG $G_{0}=(V,\varnothing)$ and add edges from $E$ one at a time starting with $G_{0}$, let $G_{i}$ denote the graph $(V,\{e_{1},...,e_{i}\})$. As we incrementally perform edge insertions we also maintain a rooted meta-tree $T$ which contains information about STPs that we have computed, helping us classify the types of edge insertions that are being performed.
+
+Let $T_{i}$ denote the state of the meta-tree after the first $i$ insertions. All of the internal meta-nodes $x$ of $T_{i}$ have exactly 3 children, the left, middle and right, denoted by $x_{L}$, $x_{F}$ and $x_{R}$ respectively. The meta-leaves of $T_{i}$ all have ordered subsets of $V(G)$ \textit{attached} to them, given a meta-leaf $x$ of $T_{i}$, we denote this set by $set_{i}(x)$ and the ordering of this set by $\prec_{x}^{i}$. We also recursively define $set_{i}$ for internal meta-nodes $x$ by setting $set_{i}(x) = set_{i}(x_{L}) \cup set_{i}(x_{F}) \cup set_{i}(x_{R})$ with the ordering of $set_{i}(x)$ induced from the orderings of the $set_{i}$ of its children and setting $set_{i}(x_{L}) \prec_{x}^{i} set_{i}(x_{F}) \prec_{x}^{i} set_{i}(x_{R})$.
+
+The meta-tree $T$ maintains the following properties as edges are inserted, hence $\forall i \in \{0,...,n\}$:
+
+\begin{enumerate}
+\item The subsets of $V$ attached to the meta-leaves of $T_{i}$ form a partition of $V$
+\item Given any meta-node $x$ of $T_{i}$, the ordering $\prec_{x}^{i}$ is a topological ordering on $G_{i}[set_{i}(x)]$
+\item Given any internal meta-node $x$ of $T_{i}$, $(set_{i}(x_{L}), set_{i}(x_{F}), set_{i}(x_{R}))$ is an STP of $G_{i}[set_{i}(x)]$
+\item Let $x$ be a meta-node of $T_{i}$, if the (unique) path from $x$ to the root doesn't contain any meta-nodes that are middle children, then for any $j\geq i$, $set_{i}(x) \subseteq set_{j}(x)$
+\end{enumerate}
+
+The meta-tree $T_{0}$ is a single meta-node $r$ with $set_{i}(r)=V(G)$ and any random ordering of the nodes $\prec_{r}^{i}$. We want to find an algorithm that allows us to efficiently compute $T_{i}$ from $T_{i-1}$ and $G_{i}$, giving us $\prec_{r}^{i}$ which by properties 2 and 4 of the meta-tree defines a topological ordering on $G_{i}$.
+
+% edge insertions
+\subsection{Handling Edge Insertions}
+
+Let $\prec_{meta}^{i}$ be an ordering of the meta-leaves of the meta-tree created from traversing $T_{i}$ in pre-order, so for any two meta-leaves $x,y \in V(T_{i})$, $x \prec_{meta}^{i} y$ if $x$ is found first in the pre-order traversal of $T_{i}$. Notice that if we combine $\prec_{meta}^{i}$ with the orderings $\prec_{x}^{i}$ for the sets $set_{i}(x)$ at each meta-leaf $x$, we get $\prec_{r}^{i}$. For some node $u \in V(G)$, let $node_{i}(u)$ denote the unique meta-leaf $x$ in $T_{i}$ that has $u \in set_{i}(x)$.
+
+Let $e_{i}=(u_{i},v_{i})$ be the edge inserted at step $i$ into $G_{i-1}$ to obtain $G_{i}$. Let $node_{i-1}(u_{i})=x_{1},...,x_{k}=node_{i}(v_{i-1})$ be the unique path $p_{i}$ from $x_{1}$ to $x_{k}$ in $T_{i-1}$. Let $x_{j}\in p_{i}$ denote the least common ancestor of $x_{1}$ and $x_{j}$ in $T_{i-1}$. We now consider the 3 following cases that may occur when an edge is inserted.
+
+\begin{enumerate}
+\item $node_{i-1}(u_{i}) \prec_{meta}^{i-1} node_{i-1}(v_{i})$
+\item $node_{i-1}(u_{i}) = node_{i-1}(v_{i})$
+\item $node_{i-1}(v_{i}) \prec_{meta}^{i-1} node_{i-1}(u_{i})$
+\end{enumerate}
+
+Here is an outline of what has to be done to restore or maintain the properties of the meta-tree in these 3 cases.
+
+% forward edge
+\subsubsection{Case $node_{i-1}(u_{i}) \prec_{meta}^{i-1} node_{i-1}(v_{i})$:}
+
+If this is the case, then we don't need to do anything since $x_{1} \prec_{meta}^{i-1} x_{k}$ so $u_{i} \prec_{r}^{i-1} v_{i}$. So we can just let $T_{i}=T_{i-1}$.
+
+% same set edge
+\subsubsection{Case $node_{i-1}(u_{i}) = node_{i-1}(v_{i})$:}
+
+If this is the case, then we can invoke Proposition 3 to break down the set $S=set_{i-1}(x)$ with $x=node_{i-1}(u_{i})$ into an STP $(L,F,R)$, with $L=reach_{i}^{-1}(u_{i}) \cap S$, $R=reach_{i}(v_{i}) \cap S$ and $F=S \setminus (L \cup R)$. To compute $T_{i}$, take $T_{i-1}$ and add 3 children $x_{L}$, $x_{F}$ and $x_{R}$ to $x$ with $set_{i}(x_{L}) = L$, $set_{i}(x_{F}) = F$ and $set_{i}(x_{R}) = R$, with the orderings of these sets induced by restricting $\prec_{x}^{i-1}$.
+
+% backwards edge
+\subsubsection{Case $node_{i-1}(v_{i}) \prec_{meta}^{i-1} node_{i-1}(u_{i})$:}
+
+This case is by far the most complex, since we need to be able to remove and add nodes to STPs in such a way that preserve the invariant properties of the meta-tree. Immediately we can observe that since $node_{i-1}(u_{i}) \nprec_{meta}^{i-1} node_{i-1}(v_{i})$ we have $u_{i} \nprec_{r}^{i-1} v_{i}$, hence $T_{i} \neq T_{i-1}$.
+
+In the next section we will show how to recursively add sets of topologically ordered nodes into the sets attached to sub-trees of the meta-tree while maintaining the properties of the meta-tree. For now assume it's possible.
+
+Consider the state of $T_{i-1}$ around $x_{j}$ defined above. Since $node_{i-1}(v_{i}) \prec_{meta}^{i-1} node_{i-1}(u_{i})$, there are 3 possibilities for where $x_{i-1}$ and $x_{i+1}$ are located. By definition of $x_{j}$ we have $x_{j-1}, x_{j+1} \in \{ x_{j_{L}}, x_{j_{F}}, x_{j_{R}} \}$. Now consider the 3 cases.
+
+\begin{enumerate}
+    \item $x_{j-1}=x_{j_{R}}$ and $x_{j+1}=x_{j_{L}}$: we can immediately deduce that a cycle is present in $G_{i}$ since an edge has been added from the \textit{right} nodes to the \textit{left} nodes of the STP associated with the meta-node $x_{j}$
+
+    \item $x_{j-1}=x_{j_{R}}$ and $x_{j+1}=x_{j_{F}}$: remove $reach_{i}(v_{i}) \cap set_{i-1}(x_{j_{F}})$ from $set_{i-1}(x_{j_{F}})$ and add it to $set_{i-1}(x_{j_{R}})$.
+
+    \item $x_{j-1}=x_{j_{F}}$ and $x_{j+1}=x_{j_{L}}$: remove $reach_{i}^{-1}(u_{i}) \cap set_{i-1}(x_{j_{F}})$ from $set_{i-1}(x_{j_{F}})$ and add it to $set_{i-1}(x_{j_{L}})$.
+\end{enumerate}
+
+So we can fully restore the properties of the meta-tree (and hence the topological ordering) with a single call to this (currently undefined) algorithm that moves nodes between the STPs in the meta-tree.
+
+% CHAPTER 3
+\section{Computing the Meta Trees}
+
+\subsection{Modifying the STPs of the Meta Tree}
+
+As we saw above, we need to be able to move nodes between the sets attached to the meta-leaves of the meta-tree. Here we outline a process that will allow us to do this. In particular, we want an algorithm that given an meta-node $x$ in $T_{i}$, allows us to move topologically ordered subsets $A \subseteq \bigcup_{y \prec_{meta}^{i} x} set_{i}(y)$ and $B \subseteq \bigcup_{x \prec_{meta}^{i} y} set_{i}(y)$ with orderings $\prec_{A}$ and $\prec_{B}$ respectively, into $S=set_{i}(x)$, with the sets satisfying the following properties
+
+\begin{enumerate}
+\item $A$, $B$ and $S$ are pairwise disjoint
+\item the ordering $\prec^{*}$ we get from combining $\prec_{A}$, $\prec_{B}$ and $\prec_{x}^{i}$ and setting $A \prec^{*} S \prec^{*} B$ disagrees with at most one edge in $G_{i+1}$ between the sets
+\end{enumerate}
+
+We now give an outline for an algorithm ADD$_{i}(T,x,A,B)$ which takes the current meta-tree $T$, a meta-node $x$ in $T$, two sets of nodes $A$ and $B$ satisfying the properties above, and moves nodes in $A$ and $B$ into the meta-leaves in the sub-tree of $x$. We will later prove that a single call of this algorithm can restore all the properties of the meta-tree after an insertion, more specifically, it can compute $T_{i+1}$ after a type 3 edge insertion.
+
+\begin{enumerate}
+    \item \textbf{Base case.} If $x$ is not an internal meta-node of $T_{i}$, then let $set_{T}(x)=A\cup set_{T}(x)\cup B$, and let $\prec_{x}^{T}$ be the ordering we get from combining the other orderings as done above. If there is an edge that disagrees with this ordering, i.e. this is not a topological ordering on $set_{T}(x)$, then treat this like a type 2 edge insertion.
+    \item \textbf{Recursive call.} First we create 6 ordered sets that we will use to partition $A$ and $B$. $L_{A}$, $F_{A}$ and $R_{A}$ for $A$ and $L_{B}$, $F_{B}$ and $R_{B}$ for $B$ initially all $\varnothing$. Let $L$, $F$ and $R$ denote $set_{T}(x_{L})$, $set_{T}(x_{F})$ and $set_{T}(x_{R})$ respectively.
+    \item \begin{enumerate}[i.]
+        \item Find $reach_{i+1}^{-1}(L) \cap A$, remove it from $A$, and place it in $L_{A}$
+        \item Find $reach_{i+1}^{-1}(L) \cap B$, remove it from $B$, and place it in $L_{B}$
+        \item Find $reach_{i+1}(R) \cap A$, remove it from $A$, and place it in $R_{A}$
+        \item Find $reach_{i+1}(R) \cap B$, remove it from $B$, and place it in $R_{B}$
+        \end{enumerate}
+    \item \begin{enumerate}[i.]
+        \item Find $reach_{i+1}^{-1}(L_{A} \cup L_{B}) \cap F$, remove it from $F$, and place it in $L_{B}$
+        \item Find $reach_{i+1}(R_{A} \cup R_{B}) \cap F$, remove it from $F$, and place it in $R_{A}$
+        \end{enumerate}
+    \item Let $F_{A}=A \setminus (L_{A} \cup R_{A})$ and $F_{B}=B \setminus (L_{B} \cup R_{B})$
+    \item \begin{enumerate}[i.]
+        \item recursive call to ADD$_{i}(T,x_{L},L_{A},L_{B})$
+        \item recursive call to ADD$_{i}(T,x_{F},F_{A},F_{B})$
+        \item recursive call to ADD$_{i}(T,x_{R},R_{A},R_{B})$
+        \end{enumerate}
+\end{enumerate}
+
+\subsection{Correctness}
+
+As we saw, all internal meta-nodes $x$ of $T_{i}$ have associated STPs on $G_{i}[set_{i}(x)]$. We want our algorithm to reduce the \textit{freedom} of these STPs when possible, and the process which we use to do this requires the following proposition.
+
+\begin{proposition}
+Let $G=(V,E)$ be a DAG. Suppose $(L,F,R)$ is an STP of $G$ with $u \in V$, $D=reach_{G}(u)$, $A=reach_{G}^{-1}(u)$ then $(L\setminus D,F\setminus D,R\setminus D)$ is an STP of $G[V\setminus D]$ and $(L\setminus A,F\setminus A,R\setminus A)$ is an STP of $G[V\setminus A]$
+\end{proposition}
+
+\begin{proof}
+Let $P=(L\setminus D,F\setminus D,R\setminus D)$. We need to check the 3 conditions of an STP. \textbf{1.} Since $L$, $F$ and $R$ partition $V$, we get that $L\setminus D$, $F\setminus D$, and $R\setminus D$ partition $V\setminus D$. \textbf{3.} There can't be any edges from $F\setminus D$ to $L\setminus D$ or from $R\setminus D$ to $F\setminus D$, or else this would contradict the fact that $(L,F,R)$ is an STP. \textbf{2.} Denote $G[V\setminus D]$ by $H$. Using proposition 1, we just need to show that $\forall v \in L \setminus D$, $w \in R \setminus D$ we have $w \in reach_{H}(v)$. Suppose this is not the case, then some $w \in R \setminus D$ can't be reached from some $v \in L \setminus D$ in $H$. Since $w \in reach_{G}(v)$, there exists some path $p$ from $v$ to $w$ in $G$. Since $p \nsubseteq V \setminus D$ we get that $p \cap D \neq \varnothing$, so let $u^{*} \in p \cap D$. Since $reach_{G}(u^{*}) \subseteq D$, $p \cap D$ is a path from $u^{*}$ to $w$ contained in $D$, hence $w \in D$, contradicting the fact that $w \in R \setminus D$. Hence, adding any edge from $R \setminus D$ to $L \setminus D$ creates a cycle. It follows that $P$ is an STP of H. An analogous argument gives the same for the STP $(L\setminus A,F\setminus A,R\setminus A)$ of $G[V\setminus A]$.
+\end{proof}
+
+\end{document}
