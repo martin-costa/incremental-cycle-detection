@@ -1,0 +1,80 @@
+\documentclass{article}
+
+% packages
+\usepackage[utf8]{inputenc}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{dsfont}
+
+\usepackage{calrsfs}
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+
+% definitions and commands
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+\voffset = -20pt % defaults to 0pt
+\textheight = 581pt % defaults to 561pt
+\hoffset = -10pt % defaults to 0pt
+\textwidth = 375pt % defaults to 355pt
+
+\title{Expected Recourse Bounds (Draft 1)}
+\author{Martin Costa}
+\date{August 2020}
+
+\begin{document}
+
+\maketitle
+
+% CHAPTER 1
+\section{Lemma Statements}
+
+We want to prove the following Lemmas. Fix DAG $G=(V,E)$ with root $r$.
+
+\begin{lemma}
+Let $(e_t)_{t \in [m]}$ be any normal insertion sequence of $G$. The expected recourse of $r$ is $\pazocal{O}(\log n)$, with expectation taken over the uniformly generated initial ordering.
+\end{lemma}
+
+\begin{lemma}
+Let $(e_t)_{t \in [m]}$ be any insertion sequence of $G$ and fix any initial ordering $\prec_0$. We can compute a normal insertion sequence $\Gamma((e_t)_{t \in [m]}) = (\hat{e}_t)_{t \in [m]}$ such that for all $x \in V$ we have $recourse_x((e_t)_{t \in [m]}, \prec_0) \leq recourse_x((\hat{e}_t)_{t \in [m]}, \prec_0)$.
+\end{lemma}
+
+% CHAPTER 2
+\section{Lemma 2}
+
+We start by giving some definitions. Fix DAG $G=(V,E)$ with root $r$.
+
+\begin{definition}
+Given some insertion sequence $(e_t)_{t \in [m]}$ of $G$ the \textbf{activation sequence} of $(e_t)_t$ with respect to $r$, denoted by $(a_t)_t = act_r((e_t)_t)_t$, is a sequence of length $m$ of (potentially empty) sets that form a partition of $V$, where $(a_t)_t = reach_{t}^{-1}(r) \setminus reach_{t-1}^{-1}(r)$.
+\end{definition}
+
+Given some activation sequence $(a_t)_t$, let $a(x)$ denote the set in the sequence that contains $x$ and let $a^{-1}_x$ denote the value of $t$ such that $x \in a_t$. Notice that the activation sequence of some insertion sequence does not depend on the underlying ordering.
+
+\begin{definition}
+Given two activation sequences $(a_t)_t = act_r((e_t)_t)_t$ and $(\hat{a}_t)_t = act_r((\hat{e}_t)_t)_t$ we say that $(a_t)_t$ is a \textbf{compression} of $(\hat{a}_t)_t$ (or that $(\hat{a}_t)_t$ is an \textbf{expansion} of $(a_t)_t$) if for all $x,y \in V$, if $a^{-1}_x < a^{-1}_y$ then $\hat{a}^{-1}_x < \hat{a}^{-1}_y$. We denote this by $(a_t)_t \trianglelefteq (\hat{a}_t)_t$.
+\end{definition}
+
+We can see that compression of activation sequences gives a partial order over the space of activation sequences for some graph.
+
+\begin{proposition}
+Given insertion sequences $(e_t)_t$ and $(\hat{e}_t)_t$, and corresponding activation sequences $(a_t)_t = act_r((e_t)_t)_t$, $(\hat{a}_t)_t = act_r((\hat{e}_t)_t)_t$ then for any initial ordering $\prec_0$ of $V$
+\[ (a_t)_t \trianglelefteq (\hat{a}_t)_t  \Rightarrow recourse_r((e_t)_t,\prec_0) \leq recourse_r((\hat{e}_t)_t, \prec_0) \]
+\end{proposition}
+
+\begin{proposition}
+Given any insertion sequence $(e_t)_t$
+\[ act_r((e_t)_t)_t \trianglelefteq act_r(\Gamma((e_t)_t))_t \]
+\end{proposition}
+
+\end{document}
+
+\begin{lemma}
+There is a surjection from the space of normal insertion sequences of $G$ to the space of fully decompressed activation sequences of $G$ which is bijective if and only if $G$ is a tree.
+\end{lemma}

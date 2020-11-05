@@ -1,0 +1,213 @@
+\documentclass{article}
+
+% packages
+\usepackage[utf8]{inputenc}
+%\usepackage[linesnumbered,lined,boxed,commentsnumbered]{algorithm2e}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{dsfont}
+
+\usepackage{calrsfs}
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+
+% definitions and commands
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}[theorem]{Definition}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+\voffset = -20pt % defaults to 0pt
+\textheight = 581pt % defaults to 561pt
+\hoffset = -10pt % defaults to 0pt
+\textwidth = 375pt % defaults to 355pt
+
+\title{Expected Recourse Bounds for Trees under Adversarial Arrival}
+\author{Martin Costa}
+\date{August 2020}
+
+\begin{document}
+
+\maketitle
+
+% CHAPTER 1
+\section{One-Way Search}
+
+These definitions and propositions will be to give us tools which we can use to analyse the expected recourse of the \textit{simple consistent one-way search} algorithm, which we will denote by $\pazocal{A}$. We assume from now on that $\pazocal{A}$ always performs forward searches, and we fix a DAG $G=(V,E)$.
+
+We define an \textbf{insertion sequence} of $G$ to be a bijection $\pazocal E : [m] \longrightarrow E$, and abbreviate $\pazocal E(t)$ by $\pazocal E_t$. We denote the set of all insertion sequences of $G$ by $\mathcal S_E$.
+
+\begin{definition}
+During the run of $\pazocal{A}$ on $G$, we say an edge $(u,v)$ is \textbf{critical} to $w$ if its insertion would increase the amount of nodes that can reach $w$. Similarly, we say that an edge $(u,v)$ is \textbf{right critical} to $w$ if its insertion would cause the recourse of $w$ to increase. We say $u$ is (right) critical to $w$ if there exists an edge $(u,v)$ that is (right) critical to $w$.
+\end{definition}
+
+This definition has the following obvious properties.
+
+\begin{proposition}
+Given any $u,v \in V$, if $u$ is \textbf{not} an ancestor of $v$ in $G$, then $u$ can never be critical to $v$ during the run of $\pazocal{A}$ on $G$. 
+\end{proposition}
+
+\begin{proposition}
+During the run of $\pazocal{A}$ on $G$, the insertion of an edge $(u,v)$ can only increase the recourse of $w$ if $(u,v)$ is critical to $w$, i.e. all right critical edges (nodes) to $w$ are also critical to $w$.
+\end{proposition}
+
+Combining these two properties we get the following.
+
+\begin{lemma}
+Fix an insertion sequence and an initial ordering for $G$, and use these to induce an insertion sequence and an initial ordering for $H = G[reach^{-1}_{G}(x)]$ for some node $x$. Then given some $u \in reach^{-1}_{G}(x)$, the recourse of $u$ in the run of $\pazocal{A}$ on $G$ equals the recourse of $u$ in the run of $\pazocal{A}$ on $H$.
+\end{lemma}
+
+Intuitively, this lemma is saying that the effect of $\pazocal{A}$ on some node $u$ depends only on the structure of the ancestors of $u$. We can immediately notice the following.
+
+\begin{proposition}
+We can assume without loss of generality that there exists some root node $r$ such that $G = G[reach^{-1}(r)]$.
+\end{proposition}
+
+We can also see that such a root node must be unique, so from now on we refer to \textit{the} root of $G$ and denote it by $r(G)$.
+
+\begin{corollary}
+Fix an insertion sequence and an initial ordering for $G$, and use these to induce an insertion sequence and an initial ordering for $H = G \setminus r(G)$. Then given some $u \in H$, the recourse of $u$ in the run of $\pazocal{A}$ on $G$ equals the recourse of $u$ in the run of $\pazocal{A}$ on $H$.
+\end{corollary}
+
+This Corollary says that we can remove the root from the graph with no effect on the recourse of any other node. Hence, showing that the expected recourse of the root for any DAG is $\pazocal{O}(f(n))$ would give us that the expected total recourse of any DAG is $\pazocal{O}(nf(n))$. 
+
+% CHAPTER 2
+\section{Activation Sequences}
+
+Fix a DAG $G=(V,E)$ with root $r$. Throughout this section we implicitly assume that we are using $\pazocal A$.
+
+\begin{definition}
+Given some $u \in V$ and an insertion sequence $\pazocal E$ of $G$, we say that $u$ is \textbf{activated} at time $t$, if $u \in reach^{-1}_t(r)$ and $u \notin reach^{-1}_{t-1}(r)$.
+\end{definition}
+
+\begin{definition}
+Let $\pazocal E$ be any insertion sequence of $G$. The \textbf{activation sequence} of $\pazocal E$, denoted by $\alpha = act(\pazocal E)$, is a sequence of length $m$ of potentially empty sets that form a partition of $V$, where $\alpha_t$ is the set of nodes activated at time $t$ and $\alpha_0 = \{r\}$.
+\end{definition}
+
+Here, the set $\alpha_t \subseteq V$ is the set of nodes that are able to reach $r$ for the first time after the insertion of $\pazocal E_t$. We can see that $act(\pazocal E)$ depends only on the root (or equivalently the graph) and the insertion sequence, not the initial ordering. We now make a simple but useful observation about activation sequences.
+
+\begin{proposition}
+Let $\pazocal E$ be an insertion sequence of $G$ with activation sequence $\alpha$. If $(x,y) \in E$ is inserted before $y$ is activated, then $x$ is not activated after $y$.
+\end{proposition}
+
+\begin{proof}
+Suppose that $(x,y) \in E$ is inserted before $y$ is activated. When $y$ is activated, $x$ will be able to reach $y$ which can reach $r$, so $x$ can reach $r$. So it follows that if $x$ is not already active when $y$ is activated, then they will be activated simultaneously.
+\end{proof}
+
+We now define the following useful function on activation sequences. Let $Sym(V)$ be the set of permutations of $V$.
+
+\begin{definition}
+Let $\Gamma : act_r(\mathcal{S}_{E}) \times Sym(V) \longrightarrow \mathbb{N}$ be a map such that given some insertion sequence of $\pazocal E$ of $G$ and an ordering $\prec$ of $V$, $\Gamma(act(\pazocal E), \prec)$ is the length of the sequence of nodes $(u_j)_{j=1}^k$ defined recursively by
+\[ u_0 = r, \;\;\; u_i \in \alpha_{\phi_i},\forall u \in \alpha_{\phi_i}, u \preccurlyeq u_i \]
+\[ \phi_0 = 0, \;\;\; \phi_{i+1} = min\{j : \exists u \in \alpha_j, u_i \prec u, \phi_i < j\} \]
+\end{definition}
+
+We can see that $u_i$ is defined if and only if $\phi_i < \infty$ (using $min \varnothing = \infty$) and that $(\phi_j)_{j=1}^k$ is a strictly increasing sequence. It should be clear that $\Gamma \in [n]$ for all inputs. We will now prove a Lemma giving a tight bound on the expected value of $\Gamma$ over random initial orderings.
+
+\begin{lemma}
+Let $\pazocal E$ be any insertion sequence of $G$, then
+\[ \mathbb{E}_{\prec \in \pazocal{S}_n}[\Gamma(act(\pazocal E))] = \pazocal{O}(\log n) \]
+\end{lemma}
+
+\begin{proof}
+Given some ordering $\prec$ of $V$ uniformly at random, defined by the sequence $(v_1,...,v_n)$, we can compute $\Gamma(act(\pazocal E, \prec)$ in the following way.
+
+Create a sequence $(s_i)_{i=1}^n$ where $s_i = t$ if and only if $v_i \in \alpha_t$. Set $i_{-1}=1$. Compute $t_0 = min\{s_{t_{-1}+1},...,s_n\}$ and let $i_0=max\{i:s_i=t_0\}$. Notice that $v_{i_0} = u_0$ and $t_0 = \phi_0$. If $i_0 < n$ we can continue as follows. Compute $t_1 = min\{s_{t_{0}+1},...,s_n\}$ and let $i_1=max\{i:s_i=t_1\}$. Notice that $v_{i_1} = u_1$ and $t_1 = \phi_1$. We can continue like this forming a sequence $(i_0,...,i_k)$ until we reach $i_k = n$. We now argue that $k = \pazocal O(\log n)$.
+
+We know that $u_0 = r$ and we expect it's position in the ordering to be $\frac{n}{2}$ since the ordering was generated uniformly at random, hence, we expect $i_0 = \frac{n}{2}$. Similarly, we expect the rightmost minimum in $\{s_{i_0+1},...,s_n\}$ to have an index of at least $i_0 + \frac{1}{2}(n - i_0)$ = $\frac{1}{2}(n+i_0)$ = $\frac{3}{4}n$, but it may be larger if there is more than one minimum. Continuing like this we can see that $\mathbb{E}[i_j] \geq n(1-2^{-1-j})$ giving us that $\mathbb{E}[i_{\log_{2}n}] \geq n-\frac{1}{2} > n - 1$ so we get that $k = \pazocal O(\log n)$.
+\end{proof}
+
+% CHAPTER 3
+\section{Activation Sequences for Trees}
+
+Fix a tree $\pazocal T=(V,E)$ with root $r$. Throughout this section we implicitly assume that we are using $\pazocal A$.
+
+The activation sequences of rooted trees take a very particular form because all non root nodes have an out-degree of exactly 1. This allows us to deduce the following Lemma, making it easy to show that the expected total recourse of $\pazocal A$ on trees under adversarial insertion is low.
+
+\begin{lemma}
+Let $\pazocal E$ be any insertion sequence of $\pazocal T$ and $\prec_0$ any initial ordering, then
+\[ rec_r(\pazocal E, \prec_0) = \Gamma(act(\pazocal E), \prec_0) \]
+\end{lemma}
+
+Before proving this we must make the following simple observation.
+
+\begin{proposition}
+Let $\alpha$ be an activation sequence of $\pazocal T$. If $(x,y) \in E$, then $y$ is not activated after $x$.
+\end{proposition}
+
+\begin{proof}
+Since $\pazocal T$ is a tree, there is a unique path from $x$ to $r$ and it includes $y$. Hence, when $x$ is activated (i.e. when an insertion causes $x$ to be able to reach $r$ from the first time), we know that $y$ must either be activated simultaneously or is already active.
+\end{proof}
+
+\begin{proof}[Proof of lemma 3.1]
+Suppose that $rec_r(\pazocal E, \prec_0) > \Gamma(act(\pazocal E), \prec_0)$. This implies that while $x$ and $y$ are not active an edge $(x,y)$ is inserted such that $x$ is activated before $y$. Since $\pazocal T$ is a tree, $x$ can only be activated once $y$ has been activated, giving a contradiction. Hence, $rec_r(\pazocal E, \prec_0) \leq \Gamma(act(\pazocal E), \prec_0)$.
+
+Suppose that $rec_r(\pazocal E, \prec_0) < \Gamma(act(\pazocal E), \prec_0)$. This implies that while $x$ and $y$ are not active an edge $(x,y)$ is inserted such that $y$ is activated before $x$. If such an edge is inserted, then as soon as $y$ is activated, $x$ will also be activated simultaneously, so this is not possible. Hence, $rec_r(\pazocal E, \prec_0) \geq \Gamma(act(\pazocal E), \prec_0)$.
+\end{proof}
+
+While this Lemma does not hold for DAGs in general, the second part of the proof follows from Proposition 2.3, so we get that $\Gamma(act(\pazocal E), \prec_0)$ is a lower bound on the recourse of the root for any DAG.
+
+Now we can combine Lemmas 2.5 and 3.1 to give us the following Theorem.
+
+\begin{theorem}
+Let $\pazocal E$ be any insertion sequence of $\pazocal T$, then
+\[ \mathbb{E}_{\prec_0 \in \pazocal{S}_n}[ rec_r(\pazocal E)] = \pazocal{O}(\log n) \]
+\end{theorem}
+
+\begin{proof}
+We can combine Lemmas 2.5 and 3.1 to obtains the following equality
+\[ \mathbb{E}_{\prec_0 \in \pazocal{S}_n}[ rec_r(\pazocal E)] = \mathbb{E}_{\prec_0 \in \pazocal{S}_n}[\Gamma(act(\pazocal E))] = \pazocal{O}(\log n) \]
+\end{proof}
+
+We can now bound the expected total recourse of $\pazocal A$ on trees under adversarial insertion by $\pazocal O(n \log n)$ by applying the argument to each node individually.
+
+\begin{corollary}
+Let $\pazocal E$ be any insertion sequence of $\pazocal T$, then
+\[ \mathbb{E}_{\prec_0 \in \pazocal{S}_n}[ rec(\pazocal E)] = \pazocal{O}(n\log n) \]
+\end{corollary}
+
+\begin{proof}
+The total expected recourse is the sum of the expected recourse of every node, so by linearity of expectation we get
+\[ \mathbb{E}_{\prec_0 \in \pazocal{S}_n}[ rec(\pazocal E)] = \sum_{u \in V} \mathbb{E}_{\prec_0 \in \pazocal{S}_n}[ rec_u(\pazocal E)] = \sum_{u \in V} \pazocal{O}(\log n) = \pazocal{O}(n\log n) \]
+\end{proof}
+
+% CHAPTER 4
+\section{Extending the Framework}
+
+Fix a DAG $G=(V,E)$ with root $r$. Throughout this section we implicitly assume that we are using $\pazocal A$.
+
+We shall now try and extend this framework to try and prove that the expected recourse of the root in any DAG is $\pazocal O(n \log n)$ under random order arrival. The reason the argument above only holds for trees is due to the first half of the proof for Lemma 3.1 failing when the out degree of some node in the graph exceeds 1, or equivalently, when the graph is not a tree.
+
+We now consider the effects of taking expectation over the insertion sequence instead of the initial ordering. Proving the following analog of Lemma 2.5 will give us that the total expected recourse for a tree under random order arrival with any ordering is $\pazocal O(n \log n)$
+
+\begin{lemma}
+Let $\prec_0$ be any initial ordering of $V$, then
+\[ \mathbb{E}_{\pazocal E \in \mathcal{S}_{E}}[\Gamma(act,\prec_0)] = \pazocal{O}(\log n) \]
+\end{lemma}
+
+Proving this seems to be significantly more challenging than the adversarial case. If we can also prove the following statement for any fixed ordering, then we will be able to solve the random order arrival problem.
+
+\[ \mathbb{E}_{\pazocal E \in \mathcal{S}_{E}}[rec_r(\prec_0)] = \pazocal O(\mathbb{E}_{\pazocal E \in \mathcal{S}_{E}}[\Gamma(act,\prec_0)]) \]
+
+Notice that even if we cannot prove Lemma 4.1, taking expectation over the equation above would still yield the result, but also requiring a randomized initial ordering.
+
+\[ \mathbb{E}_{\prec_0 \in \pazocal{S}_n, \pazocal E \in \mathcal{S}_{E}}[rec_r] = \pazocal O(\mathbb{E}_{\prec_0 \in \pazocal{S}_n, \pazocal E \in \mathcal{S}_{E}}[\Gamma(act)] = \pazocal{O}(\log n) \]
+
+\end{document}
+
+% UNUSED
+
+Before we continue, we first generalize the notion of activation sequences to non-root nodes (exactly how you imagine) and define some useful operations on activation sequences.
+
+\begin{definition}
+Given some $u \in V$ and an insertion sequence $\pazocal E$ of $G$, we say that $u$ is \textbf{activated} for $x$ at time $t$, if $u \in reach^{-1}_t(x)$ and $u \notin reach^{-1}_{t-1}(x)$.
+\end{definition}
+
+\begin{definition}
+Let $\pazocal E$ be any insertion sequence of $G$. The \textbf{activation sequence} of $\pazocal E$ with respect to $x$, denoted by $\alpha = act_x(\pazocal E)$, is a sequence of length $m$ of potentially empty sets that partition of $reach^{-1}(x)$, where $\alpha_t$ is the set of nodes activated for $x$ at time $t$ and $\alpha_0 = \{x\}$.
+\end{definition}

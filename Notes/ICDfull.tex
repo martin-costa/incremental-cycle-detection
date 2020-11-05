@@ -1,0 +1,112 @@
+\documentclass{article}
+
+% packages
+\usepackage[utf8]{inputenc}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{dsfont}
+
+\usepackage{calrsfs}
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+
+% definitions and commands
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+\voffset = -20pt % defaults to 0pt
+\textheight = 581pt % defaults to 561pt
+\hoffset = -10pt % defaults to 0pt
+\textwidth = 375pt % defaults to 355pt
+
+\title{Expected Recourse Bounds (Draft 1)}
+\author{Martin Costa}
+\date{August 2020}
+
+\begin{document}
+
+\maketitle
+
+% CHAPTER 1
+\section{Introduction}
+
+These definitions and propositions will be to give us tools which we can use to analyse the expected recourse of the \textit{simple consistent one-way search} algorithm, which we will denote by $\pazocal{A}$. We assume from now on that $\pazocal{A}$ always performs forward searches, and we fix a DAG $G=(V,E)$.
+
+\begin{definition}
+During the run of $\pazocal{A}$ on $G$, we say a node $u$ is \textbf{critical} to $v$ if:
+\begin{enumerate}
+    \item $u$ cannot reach $v$
+    \item there exists some edge $(u,w) \in E$ and $w$ can reach $v$ 
+\end{enumerate}
+We say an edge $(u,v)$ is \textbf{critical} to $w$ if its insertion increases the amount of nodes that can reach $w$, this implies that $u$ is critical to $w$. Similarly, we say that an edge $(u,v)$ is \textbf{right critical} to $w$ if its insertion causes the recourse of $w$ to increase.
+\end{definition}
+
+This definition has the following obvious properties.
+
+\begin{proposition}
+Given any $u,v \in V$, if $u$ is \textbf{not} an ancestor of $v$ in $G$, then $u$ can never be critical to $v$ during the run of $\pazocal{A}$ on $G$. 
+\end{proposition}
+
+\begin{proposition}
+During the run of $\pazocal{A}$ on $G$, the insertion of an edge $(u,v)$ can only increase the recourse of some node $w$ if $(u,v)$ is critical to $w$.
+\end{proposition}
+
+Combining these two properties we get the following.
+
+\begin{lemma}
+Fix a sequence of edge insertions and an initial ordering for $G$, and use these to induce a sequence of edge insertions and an initial ordering for $H = G[reach^{-1}_{G}(x)]$ for some node $x$. Then given some $u \in reach^{-1}_{G}(x)$, the recourse of $u$ in the run of $\pazocal{A}$ on $G$ equals the recourse of $u$ in the run of $\pazocal{A}$ on $H$.
+\end{lemma}
+
+Intuitively, this lemma is saying that the effect of $\pazocal{A}$ on some node $u$ depends only on the structure of the ancestors of $u$. We can immediately notice the following.
+
+\begin{corollary}
+In the run of $\pazocal{A}$ on $G$, there is always at least one node whose removal has no effect on the recourse of any other node in the graph and there is always at least one node which must have a recourse of 0.
+\end{corollary}
+
+Combining the Lemma and the Corollary we can assume without loss of generality that there exists some root node $r$ such that $G = G[reach^{-1}(r)]$. Showing that the expected recourse of $r$ is $\pazocal{O}(\textrm{polylog} \: n)$ would give us that the expected recourse of $\pazocal A$ on any DAG is $\pazocal{\tilde O}(n)$. 
+
+% CHAPTER 2
+\section{The Idea}
+
+Let $G=(V,E)$ be a DAG and $x \in V$. Given some sequence of edges from $E$ to be inserted by $\pazocal A$ and some $p \in [0,1]$, denote by $\Psi_p(x)$ the number of right critical edges to $x$ after proportion $p$ of the edges from the sequence have been inserted. We want to prove the following Lemma.
+
+\begin{lemma}
+
+Let $k$ be the number of edges $(u,v) \in E$ with $v \in reach^{-1}_G(x)$. Then
+\[ \mathbb{E}[\Psi_p(x)] \leq \frac{k}{1+kp} \]
+\end{lemma}
+
+If this is true, then we can deduce the following
+
+\[ \mathbb{E}[\textrm{recourse of $x$}] = \mathbb{E}[\textrm{right critical insertions to $x$}]  \]
+
+\[ = \sum_{t=1}^k \mathbb{P}[\textrm{$t^{th}$ insertion is right critical to $x$}]  = \sum_{t=1}^k \frac{\mathbb{E}[\Psi_{(t-1)/k}(x)]}{k-t+1}  \]
+
+\[= \sum_{t=0}^{k-1} \frac{\mathbb{E}[\Psi_{t/k}(x)]}{k-t} \leq \sum_{t=0}^{k-1} \frac{k}{(k-t)(t+1)} \leq 2+\frac{2k \log k}{k+1} = \pazocal{O} (\log k) \]
+
+% CHAPTER 2
+\section{The Approach}
+
+Instead of tackling the Lemma directly, we try to prove a slightly different version first that makes things slightly easier. First we define the following two functions.
+
+\[ 
+\forall p \in [0,1], k \geq 0, \;\;\;\; \lambda_p(k) \triangleq \frac{k(1-p)}{1+kp}   \;\;\;\; \Lambda_p(k) \triangleq \frac{\lambda_p(k)}{1-p} = \frac{k}{1+kp}
+\]
+
+We also define a slight variant of the potential function, which we denote by $\Psi^*_p$, where $\Psi^*_p(x)$ is the number of right critical edges to $x$ after attempting to insert all the edges in the graph in a random order, independently, with probability $p$. We have the following analogous Lemma.
+
+\begin{lemma}
+
+Let $k$ be the number of edges $(u,v) \in E$ with $v \in reach^{-1}_G(x)$. Then
+\[ \mathbb{E}[\Psi^*_p(x)] \leq \Lambda_p(k) \]
+\end{lemma}
+
+
+
+\end{document}

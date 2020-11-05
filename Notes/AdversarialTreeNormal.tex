@@ -1,0 +1,176 @@
+\documentclass{article}
+
+% packages
+\usepackage[utf8]{inputenc}
+%\usepackage[linesnumbered,lined,boxed,commentsnumbered]{algorithm2e}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{dsfont}
+
+\usepackage{calrsfs}
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+
+% definitions and commands
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+\voffset = -20pt % defaults to 0pt
+\textheight = 581pt % defaults to 561pt
+\hoffset = -10pt % defaults to 0pt
+\textwidth = 375pt % defaults to 355pt
+
+\title{Expected Recourse Bounds for Trees under Adversarial Arrival}
+\author{Martin Costa}
+\date{August 2020}
+
+\begin{document}
+
+\maketitle
+
+% CHAPTER 1
+\section{One-Way Search}
+
+These definitions and propositions will be to give us tools which we can use to analyse the expected recourse of the \textit{simple consistent one-way search} algorithm, which we will denote by $\pazocal{A}$. We assume from now on that $\pazocal{A}$ always performs forward searches, and we fix a DAG $G=(V,E)$.
+
+\begin{definition}
+During the run of $\pazocal{A}$ on $G$, we say a node $u$ is \textbf{critical} to $v$ if:
+\begin{enumerate}
+    \item $u$ cannot reach $v$
+    \item there exists some edge $(u,w) \in E$ and $w$ can reach $v$ 
+\end{enumerate}
+We say an edge $(u,v)$ is \textbf{critical} to $w$ if its insertion increases the amount of nodes that can reach $w$, this implies that $u$ is critical to $w$. Similarly, we say that an edge $(u,v)$ is \textbf{right critical} to $w$ if its insertion causes the recourse of $w$ to increase.
+\end{definition}
+
+This definition has the following obvious properties.
+
+\begin{proposition}
+Given any $u,v \in V$, if $u$ is \textbf{not} an ancestor of $v$ in $G$, then $u$ can never be critical to $v$ during the run of $\pazocal{A}$ on $G$. 
+\end{proposition}
+
+\begin{proposition}
+During the run of $\pazocal{A}$ on $G$, the insertion of an edge $(u,v)$ can only increase the recourse of some node $w$ if $(u,v)$ is critical to $w$.
+\end{proposition}
+
+Combining these two properties we get the following.
+
+\begin{lemma}
+Fix a sequence of edge insertions and an initial ordering for $G$, and use these to induce a sequence of edge insertions and an initial ordering for $H = G[reach^{-1}_{G}(x)]$ for some node $x$. Then given some $u \in reach^{-1}_{G}(x)$, the recourse of $u$ in the run of $\pazocal{A}$ on $G$ equals the recourse of $u$ in the run of $\pazocal{A}$ on $H$.
+\end{lemma}
+
+Intuitively, this lemma is saying that the effect of $\pazocal{A}$ on some node $u$ depends only on the structure of the ancestors of $u$. We can immediately notice the following.
+
+\begin{corollary}
+In the run of $\pazocal{A}$ on $G$, there is always at least one node whose removal has no effect on the recourse of any other node in the graph and there is always at least one node which must have a recourse of 0.
+\end{corollary}
+
+\begin{proposition}
+We can assume without loss of generality that there exists some root node $r$ such that $G = G[reach^{-1}(r)]$.
+\end{proposition}
+
+Showing that the expected recourse of $r$ is $\pazocal{O}(\log n)$ would give us that the expected recourse of $\pazocal A$ on any DAG is $\pazocal{O}(n \log n)$. 
+
+% CHAPTER 2
+\section{Normal Insertion Sequences}
+
+Fix a DAG $G=(V,E)$ with root $r$. Throughout this section we implicitly assume that we are running these insertion sequences on $\pazocal A$.
+
+\begin{definition}
+Let $(e_t)_{t \in [m]}$ be any insertion sequence of $G$. We say that the insertion sequence $(e_t)_{t \in [m]}$ is \textbf{normal} if for all $x \in V$ we have that at least one edge from $out_G(x)$ is inserted before any edges from $in_G(x)$, unless $out_G(x) = \varnothing$.
+\end{definition}
+
+\begin{corollary}
+Let $(e_t)_{t \in [m]}$ be any normal insertion sequence of $G$. The edge $(x,y)$ is inserted after $y$ can already reach $r$.
+\end{corollary}
+
+\begin{corollary}
+Let $(e_t)_{t \in [m]}$ be any normal insertion sequence of $G$. Given any $x \in V$ such that $r \prec_t x$, we have that $out_t(x) = \varnothing$.
+\end{corollary}
+
+This corollary says that any node $x$ appearing to the right of $r$ in the ordering $\prec_t$ cannot have any outgoing edges in $G_t$.
+
+\begin{corollary}
+Let $(e_t)_{t \in [m]}$ be any normal insertion sequence of $G$. For any $0 \leq t < t^* \leq m$ and $x \in V$, if $x \prec_t r$ then $x \prec_{t^*} r$.
+\end{corollary}
+
+This corollary says nodes can not be moved from the left of $r$ to the right of $r$ if the insertions sequence is normal.
+
+It should be clear that these normal insertion sequences have many desirable properties, making it easy to prove the following Lemma.
+
+\begin{lemma}
+Let $(e_t)_{t \in [m]}$ be any normal insertion sequence of $G$, then
+\[ \mathbb{E}_{\prec_0 \in \pazocal{S}_n}[ rec_r((e_t)_{t \in [m]})] = \pazocal{O}(\log n) \]
+\end{lemma}
+
+\begin{proof}
+Since nodes are unable to move from the left of $r$ to the right of $r$ during the run of $\pazocal A$ on a normal insertion sequence, the number of nodes on the right of $r$ in the ordering is non increasing. Since $\prec_0$ is taken uniformly at random, the adversary has no way of knowing which the closest node to $r$ out of the nodes on the right of $r$ is, so every time $r$ is moved to the right we expect the amount of nodes on its right to half. This clearly leads to $\pazocal{O}(\log n)$ recourse for $r$.
+\end{proof}
+
+% CHAPTER 3
+\section{Normalization of Trees}
+
+Fix a tree $\pazocal T=(V,E)$ with root $r$. Throughout this section we implicitly assume that we are running these insertion sequences on $\pazocal A$.
+
+\begin{definition}
+We define a function $\Gamma : \mathcal{S}_{E} \longrightarrow \Gamma(\mathcal{S}_{E})$ from the space of insertion sequences of $\pazocal T$ to the space of normalized insertion sequences of $\pazocal T$ by the algorithm below.
+\end{definition}
+
+Notice that $\Gamma$ will depend on $\pazocal T$ but not on $\prec_0$. This next Lemma is at the core of this approach.
+
+\begin{lemma}
+Let $(e_t)_{t \in [m]}$ be any insertion sequence of $\pazocal T$ and fix any initial ordering $\prec_0$, then 
+\[ rec_r((e_t)_{t \in [m]}, \prec_0) \leq rec_r(\Gamma((e_t)_{t \in [m]}), \prec_0) \]
+\end{lemma}
+
+\begin{algorithm}[H]
+    \SetAlgoLined
+    \KwIn{insertion sequence $(e_t)_{t \in [m]}$ of $\pazocal T$}
+    \KwOut{normal insertion sequence $(\hat e_t)_{t \in [m]}$ of $\pazocal T$}
+    
+    initialise priority queue $P \leftarrow \varnothing$\;
+    initialise zero sequence $(\hat e_t)_{t \in \varnothing}$\;
+    \For{$u \in V$}{
+        initialise set $Q_u \leftarrow \varnothing$\;
+    }
+    \For{$t \in [m]$}{
+        $(x,y) \leftarrow e_t$\;
+        \uIf{$y \in reach_t(r)$}{
+            $P \leftarrow P \cup (e_t, t)$\;
+        }
+        \Else{
+        $Q_u \leftarrow Q_u \cup (e_t, t)$\;
+        }
+        \While{$P \neq \varnothing$}{
+            $(x,y) \leftarrow poll(P)$\;
+            append $(x,y)$ to $(\hat e_t)_t$\;
+            $P \leftarrow P \cup Q_x$\;
+        }
+    }
+    \caption{Insertion sequence normalization algorithm $\Gamma$}
+\end{algorithm}
+
+\begin{proof}
+This Lemma follows from the memorylessness of trees. Suppose that during the insertion of $(e_t)_{t \in [m]}$ we have that $reach^{-1}(r)$ and it's relative ordering finds itself in a certain state, by the memorylessness of trees, during the insertion of $\Gamma((e_t)_{t \in [m]})$ we have that $reach^{-1}(r)$ and it's relative ordering will find itself in that same at some point. But the converse is not necessarily true, i.e. during the insertion of $\Gamma((e_t)_{t \in [m]})$ some intermediate states may be added, which can only increase the recourse of $r$ since we may incur more recourse while transitioning between these extra states.
+\end{proof}
+
+Combining Lemmas 2 and 3 gives us the following Theorem.
+
+\begin{theorem}
+Let $(e_t)_{t \in [m]}$ be any insertion sequence of $\pazocal T$, then
+
+\[ \mathbb{E}_{\prec_0 \in \pazocal{S}_n}[ rec_r((e_t)_{t \in [m]})] \leq \mathbb{E}_{\prec_0 \in \pazocal{S}_n}[ rec_r(\Gamma((e_t)_{t \in [m]}))] = \pazocal{O}(\log n) \]
+\end{theorem}
+
+\begin{proof}
+Follows directly from combining Lemma 2 and Lemma 3.
+\end{proof}
+
+Using the ideas from chapter 1, we can bound the total recourse by $\pazocal{O}(n \log n)$ by applying the argument above to each node in the graph individually. Hence, Theorem 1 implies that $\pazocal A$ gives an expected recourse of $\pazocal{O}(n \log n)$ on trees under adversarial arrival.
+\end{document}

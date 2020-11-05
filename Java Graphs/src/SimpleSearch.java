@@ -22,14 +22,20 @@ public class SimpleSearch {
   // total recourse of algo
   private int totalRecourse = 0;
 
-  // total amount of critical insertions
+  // total amount of critical insertions to tracedNode
   public int critical = 0;
 
-  // total amount of right-critical insertions
+  // total amount of right-critical insertions to tracedNode
   public int rightCritical = 0;
+
+  // value of potential function of tracedNode
+  public int phi = 0;
 
   // node to be traced
   public int tracedNode = 0;
+
+  // recourse of tracedNode
+  public int rec = 0;
 
   // stores the order of the graph
   private ArrayList<Integer> order;
@@ -81,7 +87,12 @@ public class SimpleSearch {
     backward.restrictedDFS(u, S, B);
     forward.restrictedDFS(v, S, F);
 
-    if (F.contains(tracedNode)) rightCritical++;
+    boolean isRightCrit = false;
+
+    if (F.contains(tracedNode)) {
+      rightCritical++;
+      isRightCrit = true;
+    }
 
     // ONE WAY SEARCH:
     if (rearrageType == 3) {
@@ -115,6 +126,8 @@ public class SimpleSearch {
         order.addAll(end - F.size() + 1, orderF);
 
         totalRecourse += F.size();
+
+        if (F.contains(tracedNode)) rec++;
       }
     }
 

@@ -1,0 +1,180 @@
+\documentclass{article}
+
+% packages
+\usepackage[utf8]{inputenc}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{dsfont}
+
+\usepackage{calrsfs}
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+
+% definitions and commands
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+\voffset = -20pt % defaults to 0pt
+\textheight = 581pt % defaults to 561pt
+\hoffset = -10pt % defaults to 0pt
+\textwidth = 375pt % defaults to 355pt
+
+\title{Expected Recourse Bounds (Draft 1)}
+\author{Martin Costa}
+\date{August 2020}
+
+\begin{document}
+
+\maketitle
+
+% CHAPTER 1
+\section{Introduction}
+
+These definitions and propositions will be to give us tools which we can use to analyse the expected recourse of the \textit{simple consistent one-way search} algorithm, which we will denote by $\pazocal{A}$. We assume from now on that $\pazocal{A}$ always performs forward searches, and we fix a DAG $G=(V,E)$.
+
+\begin{definition}
+During the run of $\pazocal{A}$ on $G$, we say a node $u$ is \textbf{critical} to $v$ if:
+\begin{enumerate}
+    \item $u$ cannot reach $v$
+    \item there exists some edge $(u,w) \in E$ and $w$ can reach $v$ 
+\end{enumerate}
+We say an edge $(u,v)$ is \textbf{critical} to $w$ if its insertion increases the amount of nodes that can reach $w$, this implies that $u$ is critical to $w$. Similarly, we say that an edge $(u,v)$ is \textbf{right critical} to $w$ if its insertion causes the recourse of $w$ to increase.
+\end{definition}
+
+This definition has the following obvious properties.
+
+\begin{proposition}
+Given any $u,v \in V$, if $u$ is \textbf{not} an ancestor of $v$ in $G$, then $u$ can never be critical to $v$ during the run of $\pazocal{A}$ on $G$. 
+\end{proposition}
+
+\begin{proposition}
+During the run of $\pazocal{A}$ on $G$, the insertion of an edge $(u,v)$ can only increase the recourse of some node $w$ if $(u,v)$ is critical to $w$.
+\end{proposition}
+
+Combining these two properties we get the following.
+
+\begin{lemma}
+Fix a sequence of edge insertions and an initial ordering for $G$, and use these to induce a sequence of edge insertions and an initial ordering for $H = G[reach^{-1}_{G}(x)]$ for some node $x$. Then given some $u \in reach^{-1}_{G}(x)$, the recourse of $u$ in the run of $\pazocal{A}$ on $G$ equals the recourse of $u$ in the run of $\pazocal{A}$ on $H$.
+\end{lemma}
+
+Intuitively, this lemma is saying that the effect of $\pazocal{A}$ on some node $u$ depends only on the structure of the ancestors of $u$. We can immediately notice the following.
+
+\begin{corollary}
+In the run of $\pazocal{A}$ on $G$, there is always at least one node whose removal has no effect on the recourse of any other node in the graph and there is always at least one node which must have a recourse of 0.
+\end{corollary}
+
+Combining the Lemma and the Corollary we can assume without loss of generality that there exists some root node $r$ such that $G = G[reach^{-1}(r)]$. Showing that the expected recourse of $r$ is $\pazocal{O}(\textrm{polylog} \: n)$ would give us that the expected recourse of $\pazocal A$ on any DAG is $\pazocal{\tilde O}(n)$. 
+
+% CHAPTER 2
+\section{Memorylessness}
+
+\begin{definition}
+We say an algorithm is \textbf{memoryless} if given any configuration $(S, \prec)$ which yields configurations $(S^*, \prec^*_1)$ and $(S^*, \prec^*_2)$, we have that $\prec^*_1 = \prec^*_2$.
+\end{definition}
+
+\begin{proposition}
+$\pazocal{A}$ is memoryless on the space of forests of rooted trees.
+\end{proposition}
+
+\begin{proof}
+We proceed by induction on the depth $D$ of the deepest tree in the forest. The base case $D=0$ is trivial as there are no insertions to be made.
+
+Let $\pazocal{F}$ be a forest of rooted trees with maximum depth $k$ and assume that the proposition holds for all $0 \leq D < k$. Let $X$ be the set of nodes in $\pazocal{F}$ of out degree 0. By Lemma 1, we know that the presence of the $x_i$ has no effect on how $\pazocal{A}$ behaves with the rest of the nodes $Y = V \setminus X$ in $\pazocal{F}$. So, by applying the inductive hypothesis, we get that the positions of any $u,v \in Y$ relative to each other in the ordering is unaffected by the order in which all edges without an endpoint in $X$ are inserted.
+
+Now consider some fixed $x \in X$ with children $y_1,...,y_l$ in $\pazocal{F}$ and consider the following 2 cases.
+
+\begin{enumerate}
+    \item $x$ is to the right of all of its ancestors in the initial ordering
+    \item $x$ is to the left of one of its ancestors in the initial ordering
+\end{enumerate}
+
+In case 1, $x$ is never moved by $\pazocal{A}$, so no insertions with an endpoint in $x$ have any effect on the ordering. In case 2, the position of $x$ in the final ordering is just to the right of the rightmost node out of $y_1,...,y_l$. In either case, the position of $x$ depends only on the edges present in $\pazocal{F}$, never on when they are inserted.
+\end{proof}
+
+\begin{proposition}
+$\pazocal{A}$ is memoryless on any directed acyclic graph $G=(V,E)$ up to the order of insertion of $out(u)$ for any $u \in V$.
+\end{proposition}
+
+\begin{proof}
+We proceed by induction on the length $L$ of the longest path in $G$. The base case $L=0$ is trivial as there are no insertions to be made.
+
+Suppose that the length of the longest path in $G$ is $k$ and assume that the proposition holds for all $0 \leq L < k$. Let $X$ be the set of nodes in $G$ of out degree 0. By Lemma 1, we know that the presence of the $x \in X$ has no effect on how $\pazocal{A}$ behaves with the rest of the nodes $Y = V \setminus X$ in $G$. So, by applying the inductive hypothesis, we get that the positions of any $u,v \in Y$ relative to each other in the ordering is unaffected by altering the order in which the edges without an endpoint in $X$ are inserted, as long as we don't disrupt the relative order of any nodes sharing a startpoint in the insertion sequence.
+
+Now consider some fixed $x \in X$ with children $y_1,...,y_l$ in $G$ and consider the following 2 cases.
+
+\begin{enumerate}
+    \item $x$ is to the right of all of its ancestors in the initial ordering
+    \item $x$ is to the left of one of its ancestors in the initial ordering
+\end{enumerate}
+
+In case 1, $x$ is never moved by $\pazocal{A}$, so no insertions with an endpoint in $x$ have any effect on the ordering. In case 2, the position of $x$ in the final ordering is to the right of the rightmost node out of $y_1,...,y_l$, call this node is $y$. We are not allowed to permute the relative order in which the edges in $out(y)$ are inserted, so all the direct descendants of $y$ will always be just to the right of $y$ in the same order. In either case, the position of $x$ in the final ordering depends only on the edges present in $G$ and the order in which the edges from $out(u)$ are inserted for all $u$ in $G$.
+\end{proof}
+
+Using the memoryless property of rooted trees we can prove the following lemma which will be crucial for the next section. First we define a potential function. Fix a rooted tree $\pazocal{T} = (V,E)$ with root $r$, and let $A \subseteq V$ be a set of mutually unrelated nodes in $\pazocal T$, i.e. given any two nodes from $A$, there exists no path between them in $\pazocal T$. Let $\Psi_A \triangleq \vert Child(A) \cap R(A) \vert$, where $Child(A)$ is the set of children of $A$ and $R(A)$ is the set of all nodes to the right of $A$ in the topological ordering. Let $C_A \subseteq E$ denote the set of edges from $Child(A)$ to $A$ and let $\Psi_A(t)$ denote the value of $\Psi_A$ after $t$ edges from $C_A$ have been inserted.
+
+We show that the memoryless property of rooted trees implies the following bounds on the expectation of the potential function. Let $k = \vert C_A \vert$.
+
+\begin{proposition}
+\[ \mathbb{E}[\Psi_A(t)] \leq \binom{k}{t}^{-1} \sum_{i=1}^k \binom{i-1}{t-1}(k-1) = \frac{k-t}{t+1} \]
+\end{proposition}
+
+\begin{proof}
+Suppose that $S \subseteq E$ has been inserted by $\pazocal{A}$ during its run on $\pazocal{T}$ so far, and that $\vert S \cap C_A \vert = t$. We can see that the potential function $\Psi_A$ depends only on the ordering of the nodes. Since, by the memoryless property, the ordering does not depend on the order in which the edges from $S$ are inserted, we deduce that $\Psi_A$ does not depend on this either. So if we can bound $\mathbb{E}[\Psi_A(t)]$ assuming that the edges from $S$ are inserted in some specific order, we get that this bound will hold for all possible insertion sequences of $S$.
+
+Assume that $S$ is inserted such that the final $t$ insertions are those from $C_A$. Then any of the last $t$ edges being inserted can not have any effect on the relative order of the nodes in $Child(A)$. Since the insertions occur uniformly at random, we can show via a counting argument that after the final $t$ insertions from $C_A$, we expect the rightmost node which is incident on one of these edges, say $u$, to have $(k-t)/(t+1)$ nodes from $A$ to its right. Therefore, since some node in $A$ will necessarily be to the right of $u$, $\mathbb{E}[\Psi_A(t)] \leq (k-t)/(t+1)$.
+\end{proof}
+
+Say that the insertion of $e$ \textbf{shifts} $A$ if it causes $\Psi_A$ to decrease. Notice that the probability of some edge $e \in C_A$ shifting $A$ is equal to the probability that its startpoint is in $Child(A) \cap R(A)$ at the time of its insertion. Using this we get that
+
+\[  \mathbb{P}[\textrm{the $t^{th}$ insertion from $C_A$ shifts $A$}] = \frac{\mathbb{E}[\Psi_A(t)]}{k-t} \]
+
+Then we get the following result.
+
+\begin{proposition}
+\[ \mathbb{E}[\textrm{insertions from $C_A$ that shift $A$}] = \pazocal{O}(\log k) \]
+\end{proposition}
+
+\begin{proof}
+\[ \mathbb{E}[\textrm{insertions from $C_A$ that shift $A$}] = \sum_{e \in C_A} \mathbb{E}[\textrm{e shifts $A$}] \]
+
+\[ \sum_{e \in C_A} \mathbb{P}[\textrm{e shifts $A$}]  = \sum_{t = 1}^{k} \mathbb{P}[\textrm{the $t^{th}$ insertion from $C_A$ shifts $A$}] \]
+
+\[ \leq \sum_{t = 1}^{k} \frac{\mathbb{E}[\Psi_A(t)]}{k-t} \leq \sum_{t = 1}^{k} \frac{1}{t+1} = H_{k+1} = \pazocal{O}(\log k) \]
+\end{proof}
+
+% CHAPTER 3
+\section{Edge Partitions}
+
+\subsection{Bounding Right Critical Insertions to the Root}
+
+Fix a rooted tree $\pazocal{T} = (V,E)$ with root $r$. We define a partition of $V$ into sets of mutually unrelated nodes, which we can use to tightly bound the total number of right critical insertions to $r$ for each set in the partition. Let $A_i$ be a subset of $V$ where $x \in A_i$ if and only if there is a path of length $i-1$ from $x$ to $r$. It is clear that $A_1,..., A_{D+1}$ partitions $V$ into sets of mutually unrelated nodes where $D$ is the depth of $\pazocal{T}$. Letting $C_i$ denote all edges with endpoints in $A_i$, we can see that $C_1,...,C_D$ forms a partition of $E$.
+
+We will now prove the following
+
+\[
+\mathbb{E} [\textrm{right critical insertions from  $C_i$ to $r$}]
+\]
+
+\[
+= \sum_{e \in C_i} \mathbb{P}[\textrm{$e$ causes a right critical insertion to $r$}]
+\]
+
+\[
+\leq \sum_{e \in C_i} \mathbb{P}[\textrm{e shifts $A_i$ $\land$ $e$ can reach $r$}] = \sum_{e \in C_i} \mathbb{P}[\textrm{e shifts $A_i$}] \mathbb{P}[\textrm{$e$ can reach $r$}]
+\]
+
+\[
+= \sum_{e \in C_i} \mathbb{P}[\textrm{e shifts $A_i$}] \mathbb{P}[\textrm{$e$ is critical to $r$}] = \sum_{e \in C_i} \mathbb{P}[\textrm{e shifts $A_i$}] \frac{1}{i}
+\]
+
+\[
+=\mathbb{E}[\textrm{insertions from $C_i$ that shift $A_i$}] \frac{1}{i} = \pazocal{O}(\log \vert C_i \vert)\frac{1}{i}
+\]
+
+\end{document}

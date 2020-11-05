@@ -1,0 +1,97 @@
+\documentclass{article}
+
+% packages
+\usepackage[utf8]{inputenc}
+%\usepackage[linesnumbered,lined,boxed,commentsnumbered]{algorithm2e}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{dsfont}
+
+\usepackage{calrsfs}
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+
+% definitions and commands
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}[theorem]{Definition}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+\voffset = -20pt % defaults to 0pt
+\textheight = 581pt % defaults to 561pt
+\hoffset = -10pt % defaults to 0pt
+\textwidth = 375pt % defaults to 355pt
+
+\title{- CS344 Project Specification - \\  Incremental Cycle Detection \& Topological Ordering }
+\author{Martin Costa}
+\date{October 2020}
+
+\begin{document}
+
+\maketitle
+
+\section{Problem}
+
+Cycle detection in directed graphs is one of the classic problems studied in algorithmic graph theory. The problem is simple, given some directed graph $G$, does it contain a cycle? In this project I will be considering a dynamic version of this problem, where we are given a graph that initially has no edges (and hence no cycles) which is updated over time by a sequence of edge insertions. After each edge is inserted, we must return whether or not the updated graph is acyclic. This problem is referred to as \textit{incremental cycle detection}.
+
+Suppose we have some DAG $G$ and we insert an edge into $G$ to obtain $G^{\star}$. It turns out that if we have access to a topological ordering $\prec$ of $G$, and we have an algorithm that we can use to compute a topological ordering $\prec^{\star}$ of $G^{\star}$ using $\prec$, then this can be used (with a small amount of overhead) to obtain an incremental cycle detection algorithm. Because of this, the problems of incremental cycle detection and \textit{incremental topological ordering} go hand in hand.
+
+These are the two problems that I will be exploring throughout my project. I will be surveying the current state of the problems, going over the major results, describing state of the art algorithms, and adding some of my own original observations.
+
+\section{Objectives}
+
+The following is a outline of how I plan to structure my final report. I may reorder the topics or present some of them at the same time depending on what is more natural.
+
+\begin{enumerate}
+    \item Introduce the problem in both an intuitive and formal way while introducing relevant notation. ($\approx$ 1 - 2 pages)
+    
+    \item Briefly survey the current state of the problem. Such as going over how the problem is \textit{well understood} for dense graphs but not for sparse graphs, and giving some of the more important results in the area. ($\approx$ 2 - 3 pages)
+    
+    \item Give descriptions of various algorithms that solve the problem efficiently, explaining their fundamental ideas at a high level without giving pseudocode, but still formally stating important Lemmas and Theorems and outlining their proofs in a clear and intuitive way. ($\approx$ 6 - 8 pages)
+    
+    [ - Everything past this point will be my work on the problem - ]
+    
+    \item Introduce the notion of the \textit{recourse} of an algorithm here, explaining why it's interesting and relevant. Simultaneously introduce the \textit{simple one-way search algorithm} $\pazocal A_1$ and the \textit{simple greedy two-way search algorithm} $\pazocal A_2$. Then introduce the random order arrival model, and the conjectures that $\pazocal A_1$ and $\pazocal A_2$ have low recourse under random order arrival. ($\approx$ 1 - 2 pages)
+    
+    \item I may introduce my framework for divide and conquer incremental topological ordering algorithms here, depending on how well it fits and if I think it's interesting enough. ($\approx$ 5 - 6 pages)
+    
+    \item Give my proof that $\pazocal A_2$ obtains $\pazocal O(n \sqrt m)$ recourse under adversarial arrival, then give the graph from [HKMST] that yields $\Omega(n \sqrt m)$ recourse on all local algorithms under adversarial arrival, followed by my detailed analysis that shows how this is does not hold under random order arrival. ($\approx$ 4 - 6 pages)
+    
+    \item Give my Lemmas about the properties of $\pazocal A_1$, introduce my notion of \textit{activation sequences}, and using my Propositions and Lemmas prove that the expected total recourse of trees under adversarial arrival is $\pazocal O(n \log n)$ with expectation taken over initial orderings. ($\approx$ 4 - 6 pages)
+    
+    \item Potentially go over a few of the many different ideas I had and things I tried while doing work on this problem. ($\approx$ 1 - 2 pages)
+\end{enumerate}
+
+If I have any new ideas these may change. I may also add some diagrams into some sections if I think it will be relevant. This current plan should be more than sufficient for the word count as it is.
+
+\section{Methodology}
+
+I went about my project by first reading various papers on the topic, slowly developing my intuition on the structure of the problem, understanding the types of arguments that do (and don't) work when analysing aspects the problem. Once I was comfortable enough that I had a good understanding of the topic, I started doing my own work, exploring many different ideas and coming up with various interesting observations. This led to me designing some original frameworks that yielded incomplete but still interesting results.
+
+\section{Timetable}
+
+Apart from a couple papers that I have left to read through properly, I have already acquired all the knowledge I will need to put this project together. I already have formal write-ups for all my work that just need to be checked thoroughly and written up with consistent notation. All that's left to do is combine everything into a formal write-up. I will spend some free time during the next few months writing up the final report and hope to have it done before the start of term 2. Due to the many responsibilities that I will have over the next few months, I am not able to come up with a concrete timetable that I will be following. However, since most of the work has already been done, if any delays do occur this will not cause any problems.
+
+\section{Resources}
+
+Being a mostly theoretical research project I did not need any resources that aren't readily available to most students. I only needed access to Python and Java to carry out some tests that were helpful.
+
+\section{Legal, Social and Ethical and Issues}
+
+Being a mostly theoretical research project that did not involve working with people apart from my supervisor, I did not encounter any legal, social or ethical issues.
+
+\end{document}
+
+\section{Resources}
+
+I will need some paper and at least 3 pencils which have already been acquired. I am currently looking into obtaining a pencil sharpener.
+
+\section{Legal Issues}
+
+I do not (currently) plan on committing any crimes throughout the course of this project.

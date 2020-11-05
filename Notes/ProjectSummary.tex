@@ -1,0 +1,102 @@
+\documentclass{article}
+
+% packages
+\usepackage[utf8]{inputenc}
+%\usepackage[linesnumbered,lined,boxed,commentsnumbered]{algorithm2e}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{dsfont}
+
+\usepackage{calrsfs}
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+
+% definitions and commands
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}[theorem]{Definition}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\polylog}{\: \mathrm{polylog} \:}
+
+\voffset = -20pt % defaults to 0pt
+\textheight = 581pt % defaults to 561pt
+\hoffset = -10pt % defaults to 0pt
+\textwidth = 375pt % defaults to 355pt
+
+\title{CS344 Discrete Mathematics Project \\  - Incremental Cycle Detection - }
+\author{Martin Costa}
+\date{August 2020}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\section{Introduction}
+
+Give an overview of the problem and what I plan on covering in this text.
+
+In this project I will be discussing variants of two different problems on the topic of incremental cycle detection, which I shall refer to as the \textbf{data structure} and \textbf{recourse} problems. I will start by giving formal descriptions of the problems, and discuss some of the important results on the topic of incremental cycle detection and it's connection to incremental topological ordering. I will then survey some state of the art algorithms for the data structure problem, and then discuss the recourse problem as well as giving some original results.
+
+\section{Problem Definitions}
+
+\subsection{Topological Order Maintenance}
+
+Show that incremental cycle detection algorithms rely on topological ordering maintenance algorithms.
+
+\subsection{Data Structure Problem}
+
+Give formal descriptions of the data structure problem, and define relevant notation.
+
+\subsection{Recourse Problem}
+
+Give formal descriptions of the recourse problem, and define relevant notation.
+
+\subsection{Simple Algorithms}
+
+Define local algorithms and describe the simple search algorithms such as the one-way and two-way greedy search algorithms.
+
+\section{Recourse Variant and My Contributions}
+
+\subsection{Conjectures}
+
+Go over the conjectures about the recourse problem such as polylog update time under random order arrival for simple algorithms.
+
+Up to now we have been considering the problem of incremental cycle detection with \textit{adversarial insertions}, where we must handle \textit{any} arbitrary insertion sequence. We shall now consider the problem in the \textit{random order arrival} model, where the insertion sequence is generated uniformly at random.
+
+With random order insertions, it is the believed that following conjecture is true.
+
+\begin{conjecture}
+Let $G=(V,E)$ be a DAG. The expected total recourse of a simple algorithm on $G$ is $\pazocal O(n \: \mathrm{ polylog } \: n)$, with expectation taken over insertion sequences.
+\end{conjecture}
+
+\subsection{Simple Recourse Upper Bound}
+
+Give lower bound on recourse for local algorithms under adversarial arrival. Show that this instance is tight.
+
+\subsection{Random Order Arrival}
+
+Show that this lower bound does not hold under random order arrival.
+
+\subsection{Trees Under Adversarial Arrival}
+
+Show that one-way search has low recourse under adversarial arrival.
+
+While doing research on this problem, I was able to prove the following special case under adversarial insertions.
+
+\begin{theorem}
+Let $\pazocal T = (V,E)$ be a tree. The expected total recourse of the simple one-way search algorithm on $\pazocal T$ is $\pazocal O(n \log n)$, with expectation taken over the initial ordering.
+\end{theorem}
+
+\section{References}
+
+[HKMST11] "Incremental Cycle Detection, Topological Ordering, and Strong Component Maintenance" https://arxiv.org/pdf/1105.2397.pdf
+
+\end{document}

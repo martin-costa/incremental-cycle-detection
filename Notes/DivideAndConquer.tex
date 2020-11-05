@@ -109,7 +109,7 @@ with $F=V \setminus (reach_{G}^{-1}(u) \cup reach_{G}(v))$
 This next proposition is the main reason that the notion of STPs is useful for this problem. This is almost too obvious to state, but it's important so we say it explicitly anyway.
 
 \begin{proposition}
-Let $G=(V,E)$ be a DAG. Suppose $(L,F,R)$ is an STP of $G$ and that $\prec_{L}$, $\prec_{F}$ and $\prec_{R}$ are topological orderings of $G[L]$, $G[F]$ and $G[R]$ respectively. The ordering $\prec_{G}$ that we get from combining these topological orderings and setting $L \prec_{G} F \prec_{G} R$ is a topological ordering of $G$. Formally, given $u, v \in G$, if for some $S \in \{ L,F,R\}$ $u,v \in S$ then $u \prec_{G} v$ if $u \prec_{S} v$, else $u \prec_{G} v$ if $u \in L$ or if $u \in F$ and $v \in R$.
+Let $G=(V,E)$ be a DAG. Suppose $(L,F,R)$ is an STP of $G$ and that $\prec_{L}$, $\prec_{F}$ and $\prec_{R}$ are topological orderings of $G[L]$, $G[F]$ and $G[R]$ respectively. The ordering $\prec_{G}$ that we get from combining these topological orderings and setting $L \prec_{G} F \prec_{G} R$ is a topological ordering of $G$. Formally, given $u, v \in G$, if for some $S \in \{ L,F,R\}$ $u,v \in S$ then $u \prec_{G} v$ if $u \prec_{S} v$, else $u \prec_{G} v$ if $u \in L$ or if $u \in F$ and $v \in R$. 
 \end{proposition}
 
 \begin{proof}
@@ -146,7 +146,7 @@ Let $e_{i}=(u_{i},v_{i})$ be the edge inserted at step $i$ into $G_{i-1}$ to obt
 \begin{enumerate}
 \item $node_{i-1}(u_{i}) \prec_{meta}^{i-1} node_{i-1}(v_{i})$
 \item $node_{i-1}(u_{i}) = node_{i-1}(v_{i})$
-\item $node_{i-1}(v_{i}) \prec_{meta}^{i-1} node_{i-1}(u_{i})$
+\item $node_{i-1}(v_{i}) \prec_{meta}^{i-1} node_{i-1}(u_{i})$ 
 \end{enumerate}
 
 Here is an outline of what has to be done to restore or maintain the properties of the meta-tree in these 3 cases.
@@ -172,9 +172,9 @@ Consider the state of $T_{i-1}$ around $x_{j}$ defined above. Since $node_{i-1}(
 
 \begin{enumerate}
     \item $x_{j-1}=x_{j_{R}}$ and $x_{j+1}=x_{j_{L}}$: we can immediately deduce that a cycle is present in $G_{i}$ since an edge has been added from the \textit{right} nodes to the \textit{left} nodes of the STP associated with the meta-node $x_{j}$
-
+    
     \item $x_{j-1}=x_{j_{R}}$ and $x_{j+1}=x_{j_{F}}$: remove $reach_{i}(v_{i}) \cap set_{i-1}(x_{j_{F}})$ from $set_{i-1}(x_{j_{F}})$ and add it to $set_{i-1}(x_{j_{R}})$.
-
+    
     \item $x_{j-1}=x_{j_{F}}$ and $x_{j+1}=x_{j_{L}}$: remove $reach_{i}^{-1}(u_{i}) \cap set_{i-1}(x_{j_{F}})$ from $set_{i-1}(x_{j_{F}})$ and add it to $set_{i-1}(x_{j_{L}})$.
 \end{enumerate}
 
@@ -195,20 +195,20 @@ As we saw above, we need to be able to move nodes between the sets attached to t
 We now give an outline for an algorithm ADD$_{i}(T,x,A,B)$ which takes the current meta-tree $T$, a meta-node $x$ in $T$, two sets of nodes $A$ and $B$ satisfying the properties above, and moves nodes in $A$ and $B$ into the meta-leaves in the sub-tree of $x$. We will later prove that a single call of this algorithm can restore all the properties of the meta-tree after an insertion, more specifically, it can compute $T_{i+1}$ after a type 3 edge insertion.
 
 \begin{enumerate}
-    \item \textbf{Base case.} If $x$ is not an internal meta-node of $T_{i}$, then let $set_{T}(x)=A\cup set_{T}(x)\cup B$, and let $\prec_{x}^{T}$ be the ordering we get from combining the other orderings as done above. If there is an edge that disagrees with this ordering, i.e. this is not a topological ordering on $set_{T}(x)$, then treat this like a type 2 edge insertion.
+    \item \textbf{Base case.} If $x$ is not an internal meta-node of $T_{i}$, then let $set_{T}(x)=A\cup set_{T}(x)\cup B$, and let $\prec_{x}^{T}$ be the ordering we get from combining the other orderings as done above. If there is an edge that disagrees with this ordering, i.e. this is not a topological ordering on $set_{T}(x)$, then treat this like a type 2 edge insertion. 
     \item \textbf{Recursive call.} First we create 6 ordered sets that we will use to partition $A$ and $B$. $L_{A}$, $F_{A}$ and $R_{A}$ for $A$ and $L_{B}$, $F_{B}$ and $R_{B}$ for $B$ initially all $\varnothing$. Let $L$, $F$ and $R$ denote $set_{T}(x_{L})$, $set_{T}(x_{F})$ and $set_{T}(x_{R})$ respectively.
-    \item \begin{enumerate}[i.]
+    \item \begin{enumerate}[i.] 
         \item Find $reach_{i+1}^{-1}(L) \cap A$, remove it from $A$, and place it in $L_{A}$
         \item Find $reach_{i+1}^{-1}(L) \cap B$, remove it from $B$, and place it in $L_{B}$
         \item Find $reach_{i+1}(R) \cap A$, remove it from $A$, and place it in $R_{A}$
         \item Find $reach_{i+1}(R) \cap B$, remove it from $B$, and place it in $R_{B}$
         \end{enumerate}
-    \item \begin{enumerate}[i.]
+    \item \begin{enumerate}[i.] 
         \item Find $reach_{i+1}^{-1}(L_{A} \cup L_{B}) \cap F$, remove it from $F$, and place it in $L_{B}$
         \item Find $reach_{i+1}(R_{A} \cup R_{B}) \cap F$, remove it from $F$, and place it in $R_{A}$
         \end{enumerate}
     \item Let $F_{A}=A \setminus (L_{A} \cup R_{A})$ and $F_{B}=B \setminus (L_{B} \cup R_{B})$
-    \item \begin{enumerate}[i.]
+    \item \begin{enumerate}[i.] 
         \item recursive call to ADD$_{i}(T,x_{L},L_{A},L_{B})$
         \item recursive call to ADD$_{i}(T,x_{F},F_{A},F_{B})$
         \item recursive call to ADD$_{i}(T,x_{R},R_{A},R_{B})$

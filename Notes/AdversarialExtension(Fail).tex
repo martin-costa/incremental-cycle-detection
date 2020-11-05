@@ -1,0 +1,110 @@
+\documentclass{article}
+
+% packages
+\usepackage[utf8]{inputenc}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{dsfont}
+
+\usepackage{calrsfs}
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+
+% definitions and commands
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+\voffset = -20pt % defaults to 0pt
+\textheight = 581pt % defaults to 561pt
+\hoffset = -10pt % defaults to 0pt
+\textwidth = 375pt % defaults to 355pt
+
+\title{Expected Recourse Bounds with Adversarial Arrival}
+\author{Martin Costa}
+\date{August 2020}
+
+\begin{document}
+
+\maketitle
+
+% CHAPTER 1
+\section{Introduction}
+
+These definitions and propositions will be to give us tools which we can use to analyse the expected recourse of the \textit{simple consistent one-way search} algorithm, which we will denote by $\pazocal{A}$. We assume from now on that $\pazocal{A}$ always performs forward searches, and we fix a DAG $G=(V,E)$.
+
+\begin{definition}
+During the run of $\pazocal{A}$ on $G$, we say a node $u$ is \textbf{critical} to $v$ if:
+\begin{enumerate}
+    \item $u$ cannot reach $v$
+    \item there exists some edge $(u,w) \in E$ and $w$ can reach $v$ 
+\end{enumerate}
+We say an edge $(u,v)$ is \textbf{critical} to $w$ if its insertion increases the amount of nodes that can reach $w$, this implies that $u$ is critical to $w$. Similarly, we say that an edge $(u,v)$ is \textbf{right critical} to $w$ if its insertion causes the recourse of $w$ to increase.
+\end{definition}
+
+This definition has the following obvious properties.
+
+\begin{proposition}
+Given any $u,v \in V$, if $u$ is \textbf{not} an ancestor of $v$ in $G$, then $u$ can never be critical to $v$ during the run of $\pazocal{A}$ on $G$. 
+\end{proposition}
+
+\begin{proposition}
+During the run of $\pazocal{A}$ on $G$, the insertion of an edge $(u,v)$ can only increase the recourse of some node $w$ if $(u,v)$ is critical to $w$.
+\end{proposition}
+
+Combining these two properties we get the following.
+
+\begin{lemma}
+Fix a sequence of edge insertions and an initial ordering for $G$, and use these to induce a sequence of edge insertions and an initial ordering for $H = G[reach^{-1}_{G}(x)]$ for some node $x$. Then given some $u \in reach^{-1}_{G}(x)$, the recourse of $u$ in the run of $\pazocal{A}$ on $G$ equals the recourse of $u$ in the run of $\pazocal{A}$ on $H$.
+\end{lemma}
+
+Intuitively, this lemma is saying that the effect of $\pazocal{A}$ on some node $u$ depends only on the structure of the ancestors of $u$. We can immediately notice the following.
+
+\begin{corollary}
+In the run of $\pazocal{A}$ on $G$, there is always at least one node whose removal has no effect on the recourse of any other node in the graph and there is always at least one node which must have a recourse of 0.
+\end{corollary}
+
+Combining the Lemma and the Corollary we can assume without loss of generality that there exists some root node $r$ such that $G = G[reach^{-1}(r)]$. Showing that the expected recourse of $r$ is $\pazocal{O}(\textrm{polylog} \: n)$ would give us that the expected recourse of $\pazocal A$ on any DAG is $\pazocal{\tilde O}(n)$. 
+
+% CHAPTER 2
+\section{The Idea}
+
+Fix a DAG $G=(V,E)$ with root $r$.
+
+\begin{definition}
+Let $(\hat e_t)_{t \in [m]}$ be some insertion sequence of $G$. We say that the insertion sequence $(\hat e_t)_{t \in [m]}$ is \textbf{semi-normal} if $(\hat e_t)_{t \in [m]} = \Gamma^*((e_t)_{t \in [m]})$ for some insertion sequence $(e_t)_{t \in [m]}$ of $G$, with $\Gamma^*$ defined as the extension of the gamma function I gave earlier.
+\end{definition}
+
+\begin{definition}
+Let the \textbf{extension} of $G$ be the graph obtained by subdividing every edge of $G$, denote this by $G^*$. We say that the graph $G$ is an extension if $G = H^*$ for some graph $H$.
+\end{definition}
+
+\begin{lemma}
+Let $(e_t)_{t \in [m]}$ be any insertion sequence of $G$ and fix any initial ordering $\prec_0$, then 
+\[ rec_r((e_t)_{t \in [m]}, \prec_0) \leq rec_r(\Gamma^*((e_t)_{t \in [m]}), \prec_0) \]
+\end{lemma}
+
+\begin{lemma}
+Let $(e_t)_{t \in [m]}$ be any semi-normal insertion sequence of $G$, if $G$ is an extension with maximum-out degree $\Delta$ then
+\[ \mathbb{E}_{\prec_0 \in \pazocal{S}_n}[ rec_r((e_t)_{t \in [m]})] = \pazocal{O}(\Delta \log n) \]
+\end{lemma}
+
+Combining the last 2 Lemmas gives us the following Theorem.
+
+\begin{theorem}
+Let $(e_t)_{t \in [m]}$ be any insertion sequence of $G$, if $G$ is an extension with maximum-out degree $\Delta$ then
+
+\[ \mathbb{E}_{\prec_0 \in \pazocal{S}_n}[ rec_r((e_t)_{t \in [m]})] \leq \mathbb{E}_{\prec_0 \in \pazocal{S}_n}[ rec_r(\Gamma^*((e_t)_{t \in [m]}))] = \pazocal{O}(\Delta \log n) \]
+\end{theorem}
+
+Using the ideas from the last chapter, we can bound the total recourse of any extension by $\pazocal{O}(\Delta n \log n)$ by applying the argument above to each node in the graph individually. Giving $\pazocal{O}(n \log n)$ total recourse for sparse extensions with adversarial arrival.
+
+Given some insertion sequence $(e_t)_{t \in [m]}$ for $G$, we can construct an insertion sequence $(\hat e_t)_{t \in [2m]}$ for its extension $G^*=(V^*=V \cup \{z_1,...,z_m \}, E^*)$, where if $e_t = (x_t, y_t)$ then $\hat e_{2t-1} = (z_t, y_t)$ and $\hat e_{2t} = (x_t, z_t)$. Let $\prec^*_t$ be the topological ordering of $G^*_t$ computed by running $\pazocal A$ on  $(\hat e_t)_{t \in [2m]}$ starting with $\prec^*_0$. We can see that $\prec^*_{2t}$ restricted to an ordering of $V$ will give us a topological ordering for $G_{t}$. If we can construct an algorithm that emulates the run of $\pazocal A$ on $G^*$ with input $(\hat e_t)_{t \in [2m]}$ as we get edges from $(e_t)_{t \in [m]}$, where each insertion from $(e_t)_{t \in [m]}$ causes two insertions into $G^*$, we can return a topological ordering for $G_t$ by computing one for $G^*_{2t}$ and restricting it to $V$. Moreover, by Theorem 1 we can compute these orderings with a total recourse of $\pazocal{O}(\Delta n \log n)$ from the nodes in $V$ (note that the total recourse of the nodes in $V^*$ is $\pazocal{O}(\Delta m \log n)$ since $\vert V^* \vert = \vert V \vert + m$).
+
+We have essentially constructed a non-local algorithm where each insertion in $G$ corresponds to two insertions in the simple one-way search on a graph that contains $G$ as a subgraph but has a "nicer structure" and hence guarantees better recourse. This gives us $\pazocal O(n \log n)$ total recourse for sparse graphs via the reduction that allows us to assume $\Delta = \pazocal O(1)$ if $G$ is sparse.
+\end{document}

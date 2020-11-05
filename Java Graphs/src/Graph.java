@@ -29,6 +29,11 @@ public class Graph {
     }
   }
 
+  // gets outdeg of u
+  public int outDeg(int u) {
+    return adjList[u].size();
+  }
+
   // add a edge (u,v) to the graph
   public void addEdge(int u, int v) {
     if (u < 0 || u >= n || v < 0 || v >= n || adjList[u].contains(v)) return;
@@ -41,6 +46,30 @@ public class Graph {
     if (u < 0 || u >= n || v < 0 || v >= n || !adjList[u].contains(v)) return;
     m--;
     adjList[u].remove(new Integer(v));
+  }
+
+  // get the reach of u in G
+  public HashSet<Integer> reach(int u) {
+
+    HashSet<Integer> S = new HashSet<Integer>();
+    S.add(u);
+
+    return reach(S);
+  }
+
+  // get the reach of S in G
+  public HashSet<Integer> reach(HashSet<Integer> S) {
+
+    HashSet<Integer> V = new HashSet<Integer>();
+    for (int i = 0; i < n; i++) {
+      V.add(i);
+    }
+
+    HashSet<Integer> F = new HashSet<Integer>();
+
+    restrictedDFS(S, V, F);
+
+    return F;
   }
 
   // can u reach v in G
@@ -257,6 +286,76 @@ public class Graph {
     return G;
   }
 
+  // generates graph on n nodes
+  public static Graph generateTree(int n, double p) {
+
+    Graph G = new Graph(n);
+    Random rnd = new Random();
+
+    // generate a random permutation
+    ArrayList<Integer> perm = new ArrayList<Integer>(n);
+    for (int i = 0; i < n; i++) {
+      perm.add(i);
+    }
+    java.util.Collections.shuffle(perm);
+
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        if (i != j && rnd.nextDouble() < p) {
+          if (G.outDeg(perm.get(i)) < 1) {
+            G.addEdge(perm.get(i), perm.get(j));
+            if (!G.isAcyclic()) {
+              G.removeEdge(perm.get(i), perm.get(j));
+            }
+          }
+        }
+      }
+    }
+    return G;
+  }
+
+  // generates graph on n nodes
+  public static Graph generateRootedDAG(int n, double p) {
+
+    Graph G = generateTree(n, p);
+    int r = G.getDAGRoot();
+    Random rnd = new Random();
+
+    // generate a random permutation
+    ArrayList<Integer> perm = new ArrayList<Integer>(n);
+    for (int i = 0; i < n; i++) {
+      perm.add(i);
+    }
+    java.util.Collections.shuffle(perm);
+
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        if (i != j && rnd.nextDouble() < p && !G.getAdjList()[perm.get(i)].contains(perm.get(j))) {
+          G.addEdge(perm.get(i), perm.get(j));
+          if (!G.isAcyclic()) {
+            G.removeEdge(perm.get(i), perm.get(j));
+          }
+        }
+      }
+    }
+    return G;
+  }
+
+  // returns any node of out-degree 0
+  public int getDAGRoot() {
+
+    int u = -1;
+    int max = n;
+
+    for (int i = 0; i < n; i++) {
+      if (adjList[i].size() < max) {
+        u = i;
+        max = adjList[i].size();
+      }
+    }
+    return u;
+  }
+
   // turns the graph into a string
   public String toString() {
     String s = "n = " + String.valueOf(n) + "\n" + "m = " + String.valueOf(m) + "\n\n";
@@ -270,6 +369,9 @@ public class Graph {
     }
     return s;
   }
+
+  // gets adjacency list
+  public LinkedList<Integer>[] getAdjList() { return adjList; }
 
   // get the number of nodes
   public int N() { return this.n; }

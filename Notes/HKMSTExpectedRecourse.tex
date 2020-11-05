@@ -37,30 +37,40 @@
 
 \subsection{Basic Definitions}
 
+Let $G=(V,E)$ be a directed acyclic graph (DAG). Given some countable set $X$, denote by $\mathcal{S}_{X}$ the space of all sequences over $X$ where each element of $X$ appears exactly once. We call the elements of $\mathcal S_E$ the \textit{insertion sequences} of $G$ and the elements of $\mathcal S_V$ the \textit{orderings} of $G$. Notice that there is a clear one-to-one correspondence between total orderings of $V$ and elements of $\mathcal S_V$.
+
+Denote by $G^{\pi}_{t}$ the graph $(V, \{ e_{\pi(1)},...,e_{\pi{(t})} \})$, i.e the graph after the first $t$ insertions from $E_{\pi}$.
+
 Let $G=(V,E)$ be a directed acyclic graph (DAG) with $V=\{ u_{1},...,u_{n}\}$ and $E=\{ e_{1},...,e_{m}\}$. Denote by $\mathcal{S}_{E}$ the space of all sequences over $E$ where each element of $E$ appears exactly once. For each $\pi \in \pazocal{S}_{m}$ (the set of all bijections from $[m]$ to itself), we associate a sequence $(e_{\pi(1)},...,e_{\pi{(m})})\in \mathcal{S}_{E}$, denoted by $E_{\pi}$. This correspondence is bijective so given any sequence we also implicitly associate a permutation. Denote by $G^{\pi}_{t}$ the graph $(V, \{ e_{\pi(1)},...,e_{\pi{(t})} \})$, i.e the graph after the first $t$ insertions from $E_{\pi}$.
 
 For each $\pi \in \pazocal{S}_{m}$, let $recourse_{G}(\pi) \in \mathbb{N}^{m}$ denote the \textit{recourse vector of $\pi$}, such that for $t \in [m]$, $recourse_{G}(\pi)_{t}$ denotes the recourse from the insertion of $e_{\pi(t)}$ during the insertion of the sequence of edges $E_{\pi}$.
 
-Define the \textit{recourse} of some sequence in $\mathcal{S}_{E}$ by $R_{G}(\pi) \triangleq \norm{recourse_{G}(\pi)}_{l_{1}}$, i.e. as the sum of the recourse of all the individual insertions. Define $W(G) \triangleq \sup_{\pi \in \pazocal{S}_{m}} {R_{G}(\pi)}$, i.e as the largest recourse that can be attained by any sequence of edge insertions of $E$. For any graph $H$, define $\Psi(H) \triangleq \sum_{u \in V(H)}\vert reach_{H}^{-1}(u) \cup reach_{H}(u) \vert \leq n^{2}$.
+Define the \textit{recourse} of some sequence in $\mathcal{S}_{E}$ by $R_{G}(\pi) \triangleq \norm{recourse_{G}(\pi)}_{l^1}$, i.e. as the sum of the recourse of all the individual insertions. Define $W(G) \triangleq \sup_{\pi \in \pazocal{S}_{m}} {R_{G}(\pi)}$, i.e as the largest recourse that can be attained by any sequence of edge insertions of $E$. For any graph $H$, define $\Psi(H) \triangleq \sum_{u \in V(H)}\vert reach_{H}^{-1}(u) \cup reach_{H}(u) \vert \leq n^{2}$.
 
 \subsection{Trivial Recourse Bound}
 
 Fix some DAG $G=(V,E)$, using the same notation as above for $V$ and $E$, and any $\pi \in \pazocal{S}_{m}$. Suppose that during the run of the simple greedy (2-way search) algorithm on input $E_{\pi}$, the edge $(u,v)$ is inserted with recourse $\lambda$. Let $D$ denote the descendants of $v$ discovered by the forward search done by the algorithm during the insertion, and $A$ denote the ancestors of $u$ discovered by the backwards search done by the algorithm during the insertion. Before the insertion, at most one edge from $D$ could reach at most one edge in $A$, but after the insertion, all of the nodes in $D$ can reach all of the nodes in $A$. So the descendants of $\Omega(\vert A \vert)$ nodes increase by $\Omega(\vert D\vert)$ and the ancestors of $\Omega(\vert D\vert)$ nodes increase by $\Omega(\vert A \vert$). Combined with the fact that $D = \Theta(A)$ and $\lambda \leq \vert A\vert + \vert D\vert$ we get that for all $t \in [m]$, $\Psi(G_{t-1}^{\pi}) + recourse_{G}(\pi)_{t}^{2} = \pazocal{O}(\Psi(G_{t}^{\pi}))$.
 
-Repeatedly applying the inequality above (and noticing that $\Psi(G_{0}^{\pi})=0$), we can deduce that $\norm{recourse_{G}(\pi)}_{l_{2}}^{2} = \sum_{t=1}^{m}{recourse_{G}(\pi)^{2}_{t}} = \pazocal{O}(\Psi(G_{t}^{\pi}))$. Using some simple norm bounds, it follows that $\norm{recourse_{G}(\pi)}_{l_{1}} \leq \sqrt{m}\norm{recourse_{G}(\pi)}_{l_{2}} = \pazocal{O}(\sqrt{m\Psi(G_{t}^{\pi})}) = \pazocal{O}(n\sqrt{m})$. So for any graph $G$, we have $W(G)=\pazocal{O}(n\sqrt{m})$.
+Repeatedly applying the inequality above (and noticing that $\Psi(G_{0}^{\pi})=0$), we can deduce that $\norm{recourse_{G}(\pi)}_{l^2}^{2} = \sum_{t=1}^{m}{recourse_{G}(\pi)^{2}_{t}} = \pazocal{O}(\Psi(G_{t}^{\pi}))$. Using some simple norm bounds, it follows that $\norm{recourse_{G}(\pi)}_{l^{1}} \leq \sqrt{m}\norm{recourse_{G}(\pi)}_{l^{2}} = \pazocal{O}(\sqrt{m\Psi(G_{t}^{\pi})}) = \pazocal{O}(n\sqrt{m})$. So for any graph $G$, we have $W(G)=\pazocal{O}(n\sqrt{m})$.
 
 % CHAPTER 1
 \section{Expected Recourse}
 
+Throughout this section we implicitly assume we are running $\pazocal A_2$.
+
 \subsection{Worst Case Recourse}
 
-In the work of [HKMST11], they give an example of a graph $G$ that satisfies $W(G) = \Omega(n\sqrt{m})$, proving that the simple greedy algorithm does not satisfy worst case recourse $\pazocal{\tilde{O}}(n)$ for all graphs. However, this example does have an \textit{expected recourse} of $\pazocal{\tilde{O}}(n)$, where the expected recourse is defined as $\mathbb{E}[R_{G}] \triangleq \sum_{x \geq 0} x \mathbb{P}[R_{G}=x] = \frac{1}{m!} \sum_{\pi \in \pazocal{S}_{m}}R_{G}(\pi)$. We prove this next.
+In the work of [HKMST11], they construct a DAG $G=(V,E)$ and an insertion sequence $\pazocal E \in \mathcal{S}_{E}$ such that $rec(\pazocal E) = \Omega(n\sqrt{m})$, proving that the simple greedy 2-way search algorithm $\pazocal A_2$ does not satisfy worst case recourse $\pazocal{\tilde{O}}(n)$ for all graphs. However, this example does have an \textit{expected recourse} of $\pazocal{\tilde{O}}(n)$, where the expected recourse is
+
+\[ \mathbb{E}_{\pazocal E \in \mathcal{S}_{E}}[rec(\pazocal E)] = \sum_{j \geq 0} j \cdot \mathbb{P}[rec=j] = \frac{1}{m!} \sum_{\pazocal E \in \mathcal{S}_{E}}rec(\pazocal E) \]
+
+We will now prove that this is the case.
 
 \subsection{Expected Recourse Example}
 
 Consider the graph $G=(V,E)$ defined as follows. Let $k \in \mathbb{N}$ and let $S_{i} = \{ x_{i}, z_{i}^{2}, ..., z_{i}^{k-1}, y_{i} \}$ be sets of nodes of size $k$ such that $V = \bigcup_{i=1}^{k}S_{i}$. Starting with $E= \varnothing$, for all $i \in [k]$ add the edges $(x_{i}, z_{i}^{2}), (z_{i}^{2}, z_{i}^{3}), ..., (z_{i}^{k-2}, z_{i}^{k-1}), (z_{i}^{k-1}, y_{i})$ to $E$. Let $X_{i}=\{x_{i},...,x_{k}\}$ and $Y_{i}=\{y_{1},...,y_{i}\}$. For all $i \in [k], j \in X_{i+1}$ add $(y_{i}, x_{j})$ to $E$ and for all $i \in [k], j \in Y_{i-1}$ add $(y_{j}, x_{i})$ to $E$. We have $n=k^2$ and $m=\frac{3}{2}k(k-1)$. We refer to the $y_{i}$ as \textit{heads} and to the $x_{i}$ as \textit{tails}.
 
-Suppose we run the simple greedy algorithm on this graph with the sequence of edge insertions $E_{\pi}$. We want to classify different types of edge insertions and show that we expect $\pazocal{\tilde{O}}(n)$ total recourse from each type. Suppose we insert the edge $e_{\pi(t)}=(u,v)$ into the graph $G_{t-1}^{\pi}$, then we classify this edge insertion as follows.
+Suppose we run $\pazocal A_2$ on this graph with some insertion sequence $\pazocal E \in \mathcal S_E$. We want to classify different types of edge insertions and show that we expect $\pazocal{\tilde{O}}(n)$ total recourse from each type. Suppose we insert the edge $e_{\pi(t)}=(u,v)$ into the graph $G_{t-1}^{\pi}$, then we classify this edge insertion as follows.
 
 \begin{enumerate}[Type 1.]
     \item If for some $i \in [k]$, $u,v \in S_{i}$ and $G_{t}^{\pi}[S_{i}]$ is \textbf{not} a weakly connected graph
@@ -89,7 +99,7 @@ We first start off by breaking down type 1 insertions into 2 further types. Supp
     \item neither of $x_{i}$ or $y_{i}$ is contained in $reach^{-1}_{G_{t}^{\pi}}(u) \bigcup reach_{G_{t}^{\pi}}(v)$
 \end{enumerate}
 
-It should again be clear that all type 1 insertions are exactly one of these 2 types. The weakly connected components of the graph $G_{t}^{\pi}[S_{i}]$ are simple paths, so we can think of type 1 insertions as appending these paths together. Furthermore, we can think of type 1.1 insertions as appending paths that don't contain either $x_{i}$ or $y_{i}$, and type 1.2 insertions as appending a path that doesn't contain either $x_{i}$ or $y_{i}$ with one that does.
+It should again be clear that all type 1 insertions are exactly one of these 2 types. The weakly connected components of the graph $G_{t}^{\pi}[S_{i}]$ are simple paths, so we can think of type 1 insertions as appending these paths together. Furthermore, we can think of type 1.1 insertions as appending paths that don't contain either $x_{i}$ or $y_{i}$, and type 1.2 insertions as appending a path that doesn't contain either $x_{i}$ or $y_{i}$ with one that does. 
 
 Since the only nodes in $S_{i}$ that may be weakly connected to nodes not contained in $S_{i}$ are $x_{i}$ and $y_{i}$, we can deduce that the recourse of a type 1.1 insertion is at most the length of the smallest path being appended (with the length being how many nodes it contains). Similarly, we can deduce that the recourse of a type 1.2 insertion is at most the length of the path being appended that doesn't contain either $x_{i}$ or $y_{i}$.
 
@@ -105,9 +115,9 @@ p_{0}(t) = 0,     \quad 1 \leq j \leq k-1 \quad p_{j}(t) = \binom{m-j}{t-j+1}\bi
 
 From now on we fix the value $\gamma=m-k(\log n)^2$. We now find the expected value of $k \cdot p_{k}(\gamma)$.
 
-\[k \cdot p_{k}(\gamma) = k\binom{m-k+1}{\gamma-k+1}\binom{m}{\gamma}^{-1} = k\prod_{j=\gamma + 1}^{m} \bigg( \frac{j-k+1}{j} \bigg) \]
+\[k \cdot p_{k}(\gamma) = k\binom{m-k+1}{\gamma-k+1}\binom{m}{\gamma}^{-1} = k\prod_{j=\gamma + 1}^{m} \bigg( \frac{j-k+1}{j} \bigg) \] 
 
-\[ \leq k \bigg(\frac{m-k+1}{m}\bigg)^{m-\gamma} = k\bigg(1 - \frac{2}{3k}\bigg)^{4k (\log k)^2} \leq ke^{-\frac{8}{3}(\log k)^2} = k^{1-\frac{8}{3}\log k}\]
+\[ \leq k \bigg(\frac{m-k+1}{m}\bigg)^{m-\gamma} = k\bigg(1 - \frac{2}{3k}\bigg)^{4k (\log k)^2} \leq ke^{-\frac{8}{3}(\log k)^2} = k^{1-\frac{8}{3}\log k}\] 
 
 \subsubsection{Step III}
 
@@ -141,7 +151,7 @@ Consider any edge $(u,v)$ of the last $m - \gamma$ edges inserted into the graph
 
 Let $\lambda_{\gamma},...,\lambda_{m}$ be the recourse of the last $m - \gamma$ insertions. Applying the equation above we get that
 
-\[\sum_{j=\gamma}^{m}\bigg(\frac{\lambda_{j}}{k}\bigg)^{2} = \sum_{j=\gamma}^{m} \pazocal{O}\big(\Psi^{*}(G_{j}^{\pi}) - \Psi^{*}(G_{j-1}^{\pi})\big)
+\[\sum_{j=\gamma}^{m}\bigg(\frac{\lambda_{j}}{k}\bigg)^{2} = \sum_{j=\gamma}^{m} \pazocal{O}\big(\Psi^{*}(G_{j}^{\pi}) - \Psi^{*}(G_{j-1}^{\pi})\big) 
 = \pazocal{O}\big(\Psi^{*}(G) - \Psi^{*}(G_{\gamma}^{\pi})\big) = \pazocal{O}\big(k (\log n)^2\big)\]
 
 Applying some norm bounds we get

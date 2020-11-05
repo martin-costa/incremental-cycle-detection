@@ -1,0 +1,99 @@
+\documentclass{article}
+
+% packages
+\usepackage[utf8]{inputenc}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{dsfont}
+
+\usepackage{calrsfs}
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+
+% definitions and commands
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+\voffset = -20pt % defaults to 0pt
+\textheight = 581pt % defaults to 561pt
+\hoffset = -10pt % defaults to 0pt
+\textwidth = 375pt % defaults to 355pt
+
+\title{Expected Recourse Bounds (Draft 1)}
+\author{Martin Costa}
+\date{August 2020}
+
+\begin{document}
+
+\maketitle
+
+% CHAPTER 1
+\section{Introduction}
+
+These definitions and propositions will be to give us tools which we can use to analyse the expected recourse of the \textit{simple consistent one-way search} algorithm, which we will denote by $\pazocal{A}$. We assume from now on that $\pazocal{A}$ always performs forward searches, and we fix a DAG $G=(V,E)$.
+
+\begin{definition}
+During the run of $\pazocal{A}$ on $G$, we say a node $u$ is \textbf{critical} to $v$ if:
+\begin{enumerate}
+    \item $u$ cannot reach $v$
+    \item there exists some edge $(u,w) \in E$ and $w$ can reach $v$ 
+\end{enumerate}
+We say an edge $(u,v)$ is \textbf{critical} to $w$ if its insertion increases the amount of nodes that can reach $w$, this implies that $u$ is critical to $w$. Similarly, we say that an edge $(u,v)$ is \textbf{right critical} to $w$ if its insertion causes the recourse of $w$ to increase.
+\end{definition}
+
+This definition has the following obvious properties.
+
+\begin{proposition}
+Given any $u,v \in V$, if $u$ is \textbf{not} an ancestor of $v$ in $G$, then $u$ can never be critical to $v$ during the run of $\pazocal{A}$ on $G$. 
+\end{proposition}
+
+\begin{proposition}
+During the run of $\pazocal{A}$ on $G$, the insertion of an edge $(u,v)$ can only increase the recourse of some node $w$ if $(u,v)$ is critical to $w$.
+\end{proposition}
+
+Combining these two properties we get the following.
+
+\begin{lemma}
+Fix a sequence of edge insertions and an initial ordering for $G$, and use these to induce a sequence of edge insertions and an initial ordering for $H = G[reach^{-1}_{G}(x)]$ for some node $x$. Then given some $u \in reach^{-1}_{G}(x)$, the recourse of $u$ in the run of $\pazocal{A}$ on $G$ equals the recourse of $u$ in the run of $\pazocal{A}$ on $H$.
+\end{lemma}
+
+Intuitively, this lemma is saying that the effect of $\pazocal{A}$ on some node $u$ depends only on the structure of the ancestors of $u$. We can immediately notice the following.
+
+\begin{corollary}
+In the run of $\pazocal{A}$ on $G$, there is always at least one node whose removal has no effect on the recourse of any other node in the graph and there is always at least one node which must have a recourse of 0.
+\end{corollary}
+
+Combining the Lemma and the Corollary we can assume without loss of generality that there exists some root node $r$ such that $G = G[reach^{-1}(r)]$. Showing that the expected recourse of $r$ is $\pazocal{O}(\textrm{polylog} \: n)$ would give us that the expected recourse of $\pazocal A$ on any DAG is $\pazocal{\tilde O}(n)$. 
+
+% CHAPTER 2
+\section{Algorithm Modifications}
+
+I will try to modify the simple one-way search algorithm $\pazocal A$ into a non-local variant $\pazocal A^*$ that retains the desirable properties of $\pazocal A$ but also has the ability to prevent the adversary from blowing up the recourse of nodes by constructing structures like the ones we observed earlier. The following observations motivate the modifications I will propose.
+
+\begin{enumerate}
+    \item All the counterexamples we have observed rely on the algorithm slowly "dragging" nodes across these long sections of the ordering
+    \item In order to be able to do this, the adversary must fist trick the algorithm into building these "runways" out of large sections of nodes
+    \item The arguments we developed work on graphs of out-degree less than 1 (i.e. trees) because the adversary cannot construct these runways in them
+    \item Due to the randomness of $\prec_0$, the only way the adversary can construct these is by creating large paths, if they are not fully connected (i.e. not one path), they will likely overlap and not form a runway since the adversary will not be able to predict how these paths will be ordered relative to each other, analogous to the way it can't predict how the nodes will be ordered relative to each other
+    \item If we can find a way modify $\pazocal A$ so that it can detect when nodes are being moved along these runways and accelerate their movement towards the end (will likely not be local) then we could prevent their recourse from blowing up
+\end{enumerate}
+
+Now construct $\pazocal A^*$ as follows. Start will the simple one way search algorithm $\pazocal A$ and run it as usual. Suppose that during the insertion of $(x,y)$ the algorithm $\pazocal A$ tries to move an ordered set $S$ of nodes to the right of $x$. Instead of placing $S$ just to the right of $x$, we do the following. Let $k$ be the current maximum recourse of any node in $S$, and let $(x_1,...,x_j)$ be the suborder induced by the nodes that $x$ can reach. We start by looking at $x_1$, if it's recourse is greater than $2k$ or any node in $S$ can reach it, then we place all of $S$ to the left of $x_1$, if not, we continue to $x_2$, repeating the process, but stopping at $x_{2^k}$ if we get that far.
+
+With this new algorithm, nodes should "speed up" as they move down these runways and incur logarithmic recourse from moving down a linear path. We can notice the following points about $\pazocal A^*$.
+
+\begin{enumerate}
+    \item It has the exact same effect as $\pazocal A$ on trees
+    \item It satisfies Lemma 2, i.e. it performs well on normal insertion sequences
+    \item All the counter examples we observed earlier break down
+\end{enumerate}
+
+It is likely that a modification of this algorithm would be better, but this should (to some degree) capture the notion I am trying to formalize. The only barrier to proving Lemma 3 (i.e. what makes Lemma 3 false) in the general case is the order of insertion of the outgoing edges from any node. So I think that modifying how this part of the algorithm works (as we did in constructing $\pazocal A^*$) is a reasonable way to proceed. I will now try and construct new counterexamples for this algorithm and see if it can get any further down the proof of Lemma 3 before hitting a wall.
+
+\end{document}

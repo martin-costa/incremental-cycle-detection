@@ -1,0 +1,185 @@
+\documentclass{report}
+
+% packages
+\usepackage[utf8]{inputenc}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumerate}
+
+\usepackage{calrsfs}
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+\DeclareMathOperator*{\polylog}{polylog}
+
+% definitions and commands
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+\voffset = -20pt % defaults to 0pt
+\textheight = 581pt % defaults to 561pt
+\hoffset = -10pt % defaults to 0pt
+\textwidth = 375pt % defaults to 355pt
+
+\title{Upper Bounds on Expected Recourse of Incremental Cycle Detection Algorithms (Draft 2)}
+\author{Martin Costa}
+\date{August 2020}
+
+\begin{document}
+
+\chapter{Random Order Arrival}
+
+% CHAPTER 1
+\section{Introduction}
+
+\subsection{Basic Definitions}
+
+Let $G=(V,E)$ be a directed acyclic graph (DAG). Given some countable set $S$, denote by $\mathcal{S}_{S}$ the space of all sequences over $S$ where each element of $S$ appears exactly once. Given some $\pazocal S \in \mathcal S_S$ we denote the $i^{th}$ element in the sequence by $\pazocal S_i$, i.e. $\pazocal S = (\pazocal S_1, \pazocal S_2,...)$. We call the elements of $\mathcal S_E$ the \textit{insertion sequences} of $G$ and the elements of $\mathcal S_V$ the \textit{orderings} of $G$. Notice that there is a clear one-to-one correspondence between total orderings of $V$, $\prec$, and elements of $\mathcal S_V$, $\pazocal V$, where $\pazocal V_i \prec \pazocal V_j$ if and only if $i < j$. Given some $\pazocal E \in \mathcal S_E$, denote by $G^{\pazocal E}_t$ the graph $(V, \{\pazocal E_1,..., \pazocal E_t \})$, i.e. the graph $(V, \varnothing)$ after inserting the first $t$ edges in $\pazocal E$.
+
+Suppose we are running some fixed incremental topological ordering algorithm $\pazocal A$. Given some $\pazocal E \in \mathcal S_E$, $\prec \: \in \mathcal S_V$, $u \in V$ let $rec_u(\pazocal E, \prec)$ denote the \textit{recourse} of $u$ during the run of $\pazocal A$ on input $\pazocal E$ starting with the initial ordering $\prec$. For some $X \subseteq V$ let $rec_X(\pazocal E, \prec) = \sum_{u \in X} rec_u(\pazocal E, \prec)$. Let $rec_X(\pazocal E, \prec)_t$ denote the increase in recourse caused by the insertion of $\pazocal E_t$, and abbreviate $rec_V(\pazocal E, \prec)$ to $rec(\pazocal E, \prec)$.
+
+\subsection{Worst Case Recourse Upper Bound}
+
+We will now give an upper bound on the recourse of the simple greedy 2-way search algorithm, $\pazocal A_2$. While proofs of this bound already exist using similar arguments that rely on the same ideas, my proof uses the following potential function. For any graph $H$, define $\Psi(H) \triangleq \sum_{u \in V(H)}\vert reach_{H}(u) \vert \leq n^{2}$.
+
+\begin{proposition}
+Given any DAG $G=(V,E)$, the recourse of the simple greedy 2-way search algorithm, $\pazocal A_2$, satisfies the following.
+
+\[ \sup_{\pazocal E \in \mathcal S_E, \prec \in \mathcal S_V} rec(\pazocal E, \prec) =  \pazocal O (n \sqrt m) \]
+\end{proposition}
+
+\begin{proof}
+
+Fix some DAG $G=(V,E)$ and any $\pazocal E \in \mathcal S_E$, $\prec \: \in \mathcal S_V$. Suppose that during the run of $\pazocal A_2$ on input $\pazocal E$ staring with initial ordering $\prec$, the edge $\pazocal E_t = (u,v)$ is inserted causing the total recourse to increase by $\lambda = rec(\pazocal E, \prec)_t$. Let $D$ denote the descendants of $v$ discovered by the forward search done by the algorithm during the insertion, and $A$ denote the ancestors of $u$ discovered by the backwards search done by the algorithm during the insertion. Let $a = \vert A \vert$ and $d = \vert D \vert$. Before the insertion, at most one node in $D$ could reach at most one node in $A$, but after the insertion, all of the nodes in $D$ can reach all of the nodes in $A$. So the descendants of at least $a-1$ nodes increase by at least $d - 1$. Combined with the fact that $\vert a - d \vert \leq 1$ and $\lambda \leq a + d$ we get that
+\[ \Big (\frac{\lambda - 1}{2} - 1 \Big )^2 \leq (a-1)(d-1) \leq \Psi(G^{\pazocal E}_t) - \Psi(G^{\pazocal E}_{t-1}) \]
+
+Summing over $t \in [m]$ on both sides of the inequality gives
+
+\[ \sum_{t=1}^m \Big (\frac{rec(\pazocal E, \prec)_t - 1}{2} - 1 \Big )^2 \leq \Psi(G^{\pazocal E}_m) - \Psi(G^{\pazocal E}_{0}) \]
+
+Using a simple norm bound and noticing that $\Psi(G_{0}^{\pazocal E})=0$ we get
+\[ \sum_{t=1}^m \Big (\frac{rec(\pazocal E, \prec)_t - 1}{2} - 1 \Big ) \leq \Bigg (m \sum_{t=1}^m \Big (\frac{rec(\pazocal E, \prec)_t - 1}{2} - 1 \Big )^2 \Bigg )^{\frac{1}{2}} \leq \sqrt{m\Psi(G)} \leq n \sqrt m \]
+
+Moving some terms to the right we get $rec(\pazocal E, \prec) \leq 3m + 2n \sqrt m = \pazocal O (n \sqrt m)$.
+\end{proof}
+
+% CHAPTER 1
+\section{Expected Recourse}
+
+Throughout this section we implicitly assume we are running all inputs on the simple greedy 2-way search algorithm, $\pazocal A_2$.
+
+\subsection{Worst Case Recourse}
+
+In the work of [HKMST11], they construct a collection of both sparse and dense DAGs $\{ H_{k,p} : p,k \in \mathbb N, p \leq k \}$ where $n = \Theta(pk)$, $m=\Theta (k(k+p))$, with corresponding insertion sequences and initial orderings such that the recourse of \textit{any} local algorithm is $\Omega(n\sqrt{m})$ on these inputs, proving that $\pazocal A_2$ does not give $\pazocal{\tilde{O}}(n)$ recourse in all instances.\footnote{I use the notation $\pazocal{\tilde{O}}$ to hide poly-logarithmic factors, i.e. $\pazocal{\tilde{O}}(f(n))$ = $\pazocal O (f(n) \polylog f(n))$} However, it is believed that these instances do have an \textit{expected recourse} of $\pazocal{\tilde{O}}(n)$ in the random-order model, where the expected recourse is
+
+\[ \mathbb{E}_{\pazocal E \in \mathcal{S}_{E}}[rec(\pazocal E, \prec)] = \sum_{j \geq 0} j \cdot \mathbb{P}[rec(\pazocal E, \prec)=j] = \frac{1}{m!} \sum_{\pazocal E \in \mathcal S_E}rec(\pazocal E, \prec) \]
+
+I was able to come up with an intuitive proof for this, even though the arguments are relatively involved. Since incremental topological ordering is well understood for dense graphs where $m = \Omega (n^2)$, I will now be giving my proof for the case where the graph is sparse, i.e. $m = \pazocal O (n)$.  
+
+\subsection{Expected Recourse Example}
+
+Consider the graph $G=(V,E)$ defined as follows. Let $k \in \mathbb{N}$ and for all $i \in [k]$ let $S_{i} = \{ x_{i}, z_{i}^{2}, ..., z_{i}^{k-1}, y_{i} \}$ be sets of nodes of size $k$ and set $V = \bigcup_{i=1}^{k}S_{i}$. Starting with $E= \varnothing$, for all $i \in [k]$ add the edges $(x_{i}, z_{i}^{2}), (z_{i}^{2}, z_{i}^{3}), ..., (z_{i}^{k-2}, z_{i}^{k-1}), (z_{i}^{k-1}, y_{i})$ to $E$. For all $1 \leq i < j \leq k$ add $(y_i,x_j)$ to $E$. We have $n=k^2$ and $m=\frac{3}{2}k(k-1)$. We refer to the $y_{i}$ as \textit{heads} and to the $x_{i}$ as \textit{tails} and let $X_i=\{x_i,...,x_k\}$ and $Y_i=\{y_1,...,y_i\}$.
+
+We will now show that in the random order arrival model, given any initial ordering of $G$, the expected recourse of $\pazocal A_2$ on $G$ is $\pazocal {\tilde O}(n)$.
+
+Fix some initial ordering $\prec \: \in \mathcal S_V$ and suppose we run $\pazocal A_2$ on this graph with some insertion sequence $\pazocal E \in \mathcal S_E$. We want to classify all the edge insertions into finitely many types and show that we expect $\pazocal{\tilde{O}}(n)$ total recourse from each type. Suppose we insert the edge $\pazocal E_t=(u,v)$ into the graph $G_{t-1}^{\pazocal E}$, then we classify this edge insertion as follows.
+
+\begin{enumerate}[Type 1.]
+    \item If for some $i \in [k]$, $u,v \in S_{i}$ and $G_{t}^{\pazocal E}[S_{i}]$ is \textbf{not} weakly connected
+    \item If for some $i \in [k]$, $u,v \in S_{i}$ and $G_{t}^{\pazocal E}[S_{i}]$ is weakly connected
+    \item If $u$ is a head and $v$ is a tail
+\end{enumerate}
+
+It should be clear that any edge insertion is exactly one of these 3 types. Denote by $rec^{j}(\pazocal E, \prec)$ the total recourse of all type $j$ insertions from the sequence of edges $\pazocal E$. So we have that $rec(\pazocal E, \prec) = \sum_{j=1}^{3}rec^{j}(\pazocal E, \prec)$ and hence $\mathbb{E}_{\pazocal E \in \mathcal S_E}[rec(\pazocal E, \prec)] = \sum_{j=1}^{3}\mathbb{E}_{\pazocal E \in \mathcal S_E}[rec^j(\pazocal E, \prec)]$ by linearity of expectation.
+
+The high level overview of the proof can split up into 5 sections that give an intuitive outline of the approach.
+
+\begin{enumerate}[I.]
+    \item Show that $rec^{1}(\pazocal E, \prec)=\pazocal{\tilde{O}}(n)$ giving us that $\mathbb{E}_{\pazocal E}[rec^{j}(\pazocal E, \prec)]=\pazocal{\tilde{O}}(n)$.
+    \item Show that the expected number of type 2 insertions in the first $m-k(\log n)^2$ insertions is $ \leq k^{1-\frac{8}{3}\log k} \rightarrow 0$ quickly as $k \rightarrow \infty$.
+    \item Show that the expected total recourse of the type 3 insertions before any type 2 insertions have occurred is $\pazocal{\tilde{O}}(n)$.
+    \item Using the fact that type 3 insertions occur uniformly at random, bound the recourse for the last $k(\log n)^2$ insertions by $\pazocal{\tilde{O}}(n) $.
+    \item Combine everything to deduce that $\mathbb{E}_{\pazocal E}[rec(\pazocal E, \prec)]=\pazocal{\tilde{O}}(n)$.
+\end{enumerate}
+
+Throughout the rest of this section I will abbreviate $reach_{G_{t}^{\pazocal E}}$ to $reach_t$ to make things easier to read.
+
+\subsubsection{Step I}
+
+We first start off by breaking down type 1 insertions into 2 further types. Suppose we insert an edge like above, and it is classified as a type 1 insertion, then by definition of a type 1 insertion, we can assume that for some $i \in [k]$, $u,v \in S_{i}$ and $G_{t}^{\pazocal E}[S_{i}]$ is not a weakly connected graph. We further classify this edge insertion as follows.
+
+\begin{enumerate}[Type {1}.1]
+    \item one of $x_{i}$ or $y_{i}$ is contained in $reach^{-1}_t(u) \cup reach_t(v)$
+    \item neither of $x_{i}$ or $y_{i}$ is contained in $reach^{-1}_t(u) \cup reach_t(v)$
+\end{enumerate}
+
+It should again be clear that all type 1 insertions are exactly one of these 2 types, since if \textbf{both} $x_i$ and $y_i$ are contained in this set then $G_{t}^{\pazocal E}[S_{i}]$ is weakly connected. The weakly connected components of the graph $G_{t}^{\pazocal E}[S_{i}]$ are simple paths, so we can think of type 1 insertions as appending these paths together. Furthermore, we can think of type 1.1 insertions as appending paths that don't contain either $x_{i}$ or $y_{i}$, and type 1.2 insertions as appending a path that doesn't contain either $x_{i}$ or $y_{i}$ with one that does. 
+
+Since the only nodes in $S_{i}$ that may be weakly connected to nodes not contained in $S_{i}$ are $x_{i}$ and $y_{i}$, we can deduce that the recourse of a type 1.1 insertion is at most twice the length of the smallest path being appended (with the length being how many nodes it contains). Similarly, we can deduce that the recourse of a type 1.2 insertion is at most twice the length of the path being appended that doesn't contain either $x_{i}$ or $y_{i}$.
+
+Hence, within some set $S_{i}$, we get that the total recourse of the type 1.1 insertions is $\pazocal{O}(k \log k)$ by maximising this value, and similarly (but more obviously) the total recourse of the type 1.2 insertions is $\pazocal{O}(k)$. Adding up over all the $S_{i}$ for all $i \in [k]$, we get that the total recourse of the type 1 insertions is $\pazocal{\tilde{O}}(n)$, i.e $rec^1(\pazocal E, \prec)=\pazocal{\tilde{O}}(n)$. So we get $\mathbb E_{\pazocal E}[rec^1(\pazocal E, \prec)]=\pazocal{\tilde{O}}(n)$.
+
+\subsubsection{Step II}
+
+Given any $S_{i}$, what is the expected value of $\vert S_{i} \cap reach_t(x_{i})\vert$? Equivalently, how many nodes in $S_{i}$ do we expect $x_{i}$ to be able to reach after $t$ insertions? It should be clear that there is exactly one type 2 insertion per each set $S_{i}$, and that there has been a type 2 insertion in the set $S_{i}$ if and only if $\vert S_{i} \cap reach_t(x_{i})\vert = k$. Hence we get that the probability that there has been as type 2 insertion in the set $S_{i}$ is equal to the probability that $\vert S_{i} \cap reach_t(x_{i})\vert = k$. We denote the probability that $\vert S_{i} \cap reach_t(x_{i})\vert = j$ for some $j \in \{0,...,k\}$ by $p_{j}(t)$ (note that the probability does not depend on the value of $i$, i.e. which set it is). Notice that by linearity of expectation it follows that the expected number of type 2 insertions after the first $t$ insertions is $k \cdot p_k(t)$. It can easily be shown via standard combinatorial arguments (which I wont bore you with) that 
+
+\[ p_{0}(t) = 0,   \quad 1 \leq j \leq k-1 \quad p_{j}(t) = \binom{m-j}{t-j+1}\binom{m}{t}^{-1}, \quad p_{k}(t) = \binom{m-k+1}{t-k+1}\binom{m}{t}^{-1} \]
+
+From now on we fix the value $\gamma=m-k(\log n)^2$. We now find the expected value of $k \cdot p_{k}(\gamma)$.
+
+\[k \cdot p_{k}(\gamma) = k\binom{m-k+1}{\gamma-k+1}\binom{m}{\gamma}^{-1} = k\prod_{j=\gamma + 1}^{m} \bigg( \frac{j-k+1}{j} \bigg) \] 
+
+\[ \leq k \bigg(\frac{m-k+1}{m}\bigg)^{m-\gamma} = k\bigg(1 - \frac{2}{3k}\bigg)^{4k (\log k)^2} \leq ke^{-\frac{8}{3}(\log k)^2} = k^{1-\frac{8}{3}\log k}\] 
+
+\subsubsection{Step III}
+
+We can use the fact that we do not expect any type 2 insertions to occur within the first $\gamma$ insertions to help us bound the expected recourse of the type 3 insertions in this region. An edge $(u,v)$ causes a type 3 insertion if and only if $u$ is a head and $v$ is a tail. The recourse of such an insertion is at most the smallest of $\vert reach_t(v)\vert$ and $\vert reach^{-1}_t(u)\vert$. We expect this value to be less than $k$ since we do not expect any type 2 insertions to have occurred, and hence any tail $x_{i}$ to be able to reach its corresponding head $y_{i}$, and hence any node not in $S_{i}$. But how many nodes exactly do we expect it to be able to reach? This will be expected value of $\vert S_{i} \cap reach_t(x_{i})\vert$ which is equal to $\sum_{i=0}^{k}k \cdot p_{k}(t)$. We now show that $\sum_{t=0}^{m} \sum_{i=0}^{k}k \cdot p_{k}(t) = \pazocal{O}(n \log n)$, hence the type 3 insertions that occur before any type 2 insertions have a total recourse of at most $\pazocal{\tilde{O}}(n)$, since their total recourse is upper bounded by $\pazocal{O}(n \log n)$. Since we expect no type 2 insertions to occur within the first $\gamma$ insertions, it follows that we expect $\pazocal{\tilde{O}}(n)$ recourse from type 3 insertions in this region. Using standard combinatorial and analytic arguments, we can deduce the following inequality
+
+\[\sum_{i=0}^{k}k \cdot p_{k}(t) = \Bigg(k\binom{m-k+1}{t-k+1} + \sum_{i=0}^{k-1}i\binom{m-i}{t-i+1} \Bigg)\binom{m}{t}^{-1} \]
+
+\[ = k\prod_{j=t+1}^{m}\bigg(\frac{j-k+1}{j}\bigg) + (m-t)\sum_{i=1}^{k-1}\frac{i}{m-i+1} \prod_{j=t+1}^{m}\bigg(\frac{j-i+1}{j}\bigg) \]
+
+\[ = k\prod_{j=1}^{k-1}\bigg(\frac{t-j+1}{m-j+1}\bigg) + (m-t)\sum_{i=1}^{k-1}\frac{i}{m-i+1} \prod_{j=1}^{i-1}\bigg(\frac{t-j+1}{m-j+1}\bigg) \]
+
+\[ \leq k\Big( \frac{t}{m} \Big)^{k-1} + \frac{m-t}{m-k+1}\sum_{i=1}^{k-1}i\Big( \frac{t}{m} \Big)^{i-1} \]
+
+\[ \leq k\bigg(1 - \frac{m}{m-k+1} \bigg)\Big( \frac{t}{m} \Big)^{k-1} + \frac{m^2}{(m-t)(m-k+1)} \bigg(1-\Big( \frac{t}{m} \Big)^{k} \bigg) \]
+
+\[ \leq \frac{m^2}{(m-t)(m-k+1)}\]
+
+Since the rational function on the last line is strictly increasing when considered as a function of $t$, we get that
+
+\[ \sum_{t=0}^{m} \sum_{i=0}^{k}k \cdot p_{k}(t) \leq k + \int_{0}^{m-1} \frac{m^2}{(m-t)(m-k+1)} dt = k + \frac{m^2 \log m}{m-k+1} = \pazocal{O}(n \log n)\]
+
+
+
+\subsubsection{Step IV}
+
+For any subgraph of $H$ of $G$ with $V(H)=V(G)$, define $\Psi^{*}(H) \triangleq \sum_{i=1}^{k} \vert (X_{i+1} \cap reach_{H}(y_{i})) \vert$. Notice that $\Psi^{*}(G_{t}^{\pazocal E})$ is at least the number of type 3 insertions that have occurred and that $\Psi^{*}(G) = \frac{1}{2}k(k-1)$.
+
+Combining the fact that the $\frac{1}{2}k(k-1)$ edges that cause type 3 insertions are all pre-determined (iff they are from a head to a tail), with the fact that edges are inserted uniformly at random, we get that we expect $\frac{1}{3}\gamma = \frac{1}{2}k(k-1) - \frac{1}{3}k(\log n)^2$ of the first $\gamma$ insertions to be of type 3. So we get that we expect $\Psi^{*}(G)-\Psi^{*}(G_{\gamma}^{\pazocal E}) \leq \frac{1}{3}k(\log n)^2$.\footnote{Technically, since $\gamma$ may not be an integer, $G_{\gamma}^{\pazocal E}$ may not be defined. But we can assume without loss of generality that $\gamma \in \mathbb N$ or replace it with $\lfloor \gamma \rfloor$.} We show that if this is that case, then the recourse of the last $m-\gamma$ insertions is $\pazocal{\tilde{O}}(n)$.
+
+Consider any edge $(u,v)$ of the last $m - \gamma$ edges inserted into the graph, whose insertion causes the total recourse to increase by $\lambda$. Let $F,B \subseteq \{S_{1},...,S_{k}\}$ be the collections of the sets discovered by the algorithm during the forward and backwards searches respectively during the insertion. Set $f = \vert F \vert$ and $b = \vert B \vert$. Since each of the searches discovers at least $(\lambda-1)/2$ nodes and each $S_{i}$ contains $k$ nodes, we know that $f, b \geq (\lambda-1)/2k$. Note that $F$ and $B$ are disjoint, since if not, for some $i$ we have $S_{i} \in F \cap B$, so eventually we will have $y_{i} \rightsquigarrow u \rightsquigarrow v \rightsquigarrow x_{i} \rightsquigarrow y_{i}$ giving us a cycle. Also note that at most one of the heads in sets from $B$ could reach at most one of the tails in the sets from $F$ before this insertion, but after the insertion all of the heads in the sets from $B$ can reach all of the tails in the sets from $F$. This gives us that
+
+\[ \Big (\frac{\lambda - 1}{2k} - 1 \Big )^2 \leq (f-1)(b-1) \leq \Psi^*(G^{\pazocal E}_t) - \Psi^*(G^{\pazocal E}_{t-1}) \]
+
+Let $\lambda_{\gamma+1},...,\lambda_{m}$ be the recourse of the last $m - \gamma$ insertions. Applying the equation above we get that
+\[\sum_{j=\gamma+1}^{m}\Big (\frac{\lambda_j - 1}{2k} - 1 \Big )^2 \leq \sum_{j=\gamma+1}^m \Psi^*(G^{\pazocal E}_j) - \Psi^*(G^{\pazocal E}_{j-1}) = \Psi^*(G) - \Psi^*(G^{\pazocal E}_{\gamma}) \leq \frac{1}{3}k(\log n)^2 \]
+
+Applying a simple norm bound we get
+\[\sum_{j=\gamma+1}^{m}\Big (\frac{\lambda_j - 1}{2k} - 1 \Big ) \leq \bigg((m-\gamma+1) \sum_{j=\gamma+1}^{m}\Big (\frac{\lambda_j - 1}{2k} - 1 \Big )^2 \bigg ) ^{\frac{1}{2}} \leq \frac{1}{\sqrt 3} k (\log n)^2\]
+
+Moving some terms to the right we get that $\sum_{j=\gamma+1}^{m}\lambda_{j} = \pazocal O (n (\log n)^2)$. Hence the total recourse of the last $k(\log n)^2$ insertions is expected to be $\pazocal{\tilde{O}}(n)$.
+
+\subsubsection{Step V}
+
+Combining these results, we expect the total recourse from the first $m-k(\log n)^2$ insertions to be $\pazocal{\tilde{O}}(n)$ since: type 1 insertions have a total recourse of $\pazocal{\tilde{O}}(n)$, with high probability there will be no type 2 insertions in this region, and the type 3 insertions in this region have expected total recourse $\pazocal{\tilde{O}}(n)$. We have also shown that we expect the total recourse of the last $k (\log n)^2$ insertions to be $\pazocal{\tilde{O}}(n)$. It follows that the expected total recourse is equal to $\pazocal{\tilde{O}}(n)$.
+
+As a side remark, it's worth noting that the same analysis performed with $\gamma = m - k \log n$ instead of $\gamma = m - k (\log n)^2$ gives that the expected total recourse is $\pazocal O (n \log n)$. However, with this larger $\gamma$ value, this analysis yields that the expected number of type 2 insertions in the first $\gamma$ insertions is $\leq k^{-\frac{1}{3}}$, which converges to 0 \textit{much} slower than $k^{1-\frac{8}{3}\log k}$ as $k \rightarrow \infty$, so I went with the slightly weaker bound instead.
+
+\end{document}

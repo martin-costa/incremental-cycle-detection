@@ -1,0 +1,63 @@
+\documentclass{report}
+
+% packages
+\usepackage[utf8]{inputenc}
+%\usepackage[linesnumbered,lined,boxed,commentsnumbered]{algorithm2e}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{dsfont}
+
+\usepackage{calrsfs}
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+
+% definitions and commands
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}[theorem]{Definition}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+\voffset = -20pt % defaults to 0pt
+\textheight = 581pt % defaults to 561pt
+\hoffset = -10pt % defaults to 0pt
+\textwidth = 375pt % defaults to 355pt
+
+\title{- CS344 Discrete Mathematics Project - \\  Incremental Cycle Detection \& Topological Ordering}
+\author{Martin Costa}
+\date{October 2020}
+
+\begin{document}
+
+\maketitle
+
+% CHAPTER 1
+\chapter{Introduction}
+
+In this chapter I will start off by introducing to the problems of \textit{incremental cycle detection} and \textit{incremental topological ordering}, followed by formal descriptions of the problems as well as some notation that will be helpful. Finally, I will give an overview of what I will be covering in the different sections of this report.
+
+\section{Incremental Cycle Detection}
+
+Cycle detection in directed graphs is one of the classic problems studied in algorithmic graph theory. The problem is simple, given some directed graph $G$, return whether or not $G$ is acyclic. The solution is straightforward and can be computed in $\pazocal O(n+m)$ time, where $n$ is the number of \textit{nodes} in $G$ and $m$ is the number of \textit{edges} in $G$.
+
+In this project I will be considering a dynamic version of this problem, where we are given a graph that initially has no edges (and hence no cycles) which is updated over time by a sequence of edge insertions. After each edge is inserted, we must return whether or not the updated graph is acyclic. This problem is referred to as \textit{incremental cycle detection}.
+
+\section{Incremental Topological Ordering}
+
+We can can come up with a dynamic version of the \textit{topological ordering} problem in a similar way, where we are given a graph that initially has no edges (and hence admits a topological ordering) which is updated over time by a sequence of edge insertions. After each edge is inserted, we must return a topological ordering of the updated graph, and a warning if the updated graph does not admit a topological ordering. This problem is referred to as \textit{incremental topological ordering}.
+
+The fact that a graph $G$ admits a topological ordering of it's nodes if and only if $G$ is a \textit{directed acyclic graph} (DAG) is also one of the standard results in algorithmic graph theory. In fact, the most well known algorithm for cycle detection in directed graphs relies on this equivalence, and determines the presence of a cycle in $G$ by checking whether or not $G$ admits a topological ordering. The problem of cycle detection can be reduced to the problem of topological ordering, as long as we ensure that when no topological ordering exists we return the appropriate warning instead of continuing as normal.
+
+It should then be no surprise that the problems of incremental cycle detection and incremental topological ordering are also deeply connected, and that incremental cycle detection can also be reduced to incremental topological ordering, with the same caveat as before. Because of this, every well known algorithm for incremental cycle detection relies on an algorithm for incremental topological ordering.
+
+\section{Problem Statement}
+
+
+
+
+\end{document}

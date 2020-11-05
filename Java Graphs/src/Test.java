@@ -6,7 +6,7 @@ class Test {
   // main method
   public static void main(String args[]) {
 
-    int n = 400;
+    int n = 250;
 
     int runs = 10;
 
@@ -19,7 +19,7 @@ class Test {
     //   System.out.println("\n");
     // }
 
-    double c = 2;
+    double c = 6;
 
     double totalEdges = 0;
 
@@ -33,39 +33,83 @@ class Test {
 
     double avl2 = 0;
 
-    ArrayList<Edge> E = new ArrayList<Edge>(n);
+    //ArrayList<Edge> E = new ArrayList<Edge>(n);
 
     // for (int i = 0; i < n-1; i++) {
     //   E.add(new Edge(i, i+1));
     // }
     //E.add(new Edge(1, n-2));
 
-
-    for (int i = 0; i < n; i++) {
-      for (int j = i+1; j < n; j++) {
-        E.add(new Edge(i, j));
-      }
-    }
+    // for (int i = 0; i < n; i++) {
+    //   for (int j = i+1; j < n; j++) {
+    //     E.add(new Edge(i, j));
+    //   }
+    // }
 
     int l = 1;
     int t = 0;
 
-    while(l < 100000) {
+    double[] phi = new double[n];
+
+    //int[] counts = new int[n*n];
+
+    //double[] ratios = new double[n*n];
+
+    while(l++ < 300) {
+
+      Graph Ge = Graph.generateGraph(n, p);
+
+      ArrayList<Edge> E = Ge.getEdges();
+
       Collections.shuffle(E);
+
+      //System.out.println(Arrays.toString(ratios));
 
       SimpleSearch D = new SimpleSearch(n);
       D.setOneWay();
-      D.tracedNode = n-1;
+      D.G = Ge;
+      D.tracedNode = Ge.getDAGRoot();
+
+      ArrayList<Integer> order = D.getOrdering();
+
+      int pos = order.indexOf(D.tracedNode);
+
+      order.set(pos, order.get(0));
+      order.set(0, D.tracedNode);
+
+      D.updatePotential();
+
+      int insertions = 0;
+      int crits = 0;
+
+      phi[0] += D.phi;
 
       for (Edge e : E) {
         D.insert(e);
+
+        if (D.rightCritical > crits) {
+          crits++;
+          phi[crits] += D.phi;
+          //counts[insertions]++;
+        }
+        insertions++;
       }
 
-      t += D.critical;
+      t += D.rightCritical;
 
-      System.out.println(t/l);
-      l++;
+      //System.out.println(t/l);
     }
+
+    // for (int i = 0; i < n*n; i++) {
+    //   ratios[i] = counts[i]/(double)(l);
+    // }
+
+    for (int i = 0; i < n; i++) {
+      phi[i] = phi[i]/(double)(l-2);
+    }
+
+    //System.out.println(toString(ratios));
+    System.out.println(toString(phi));
 
 
 
@@ -111,7 +155,8 @@ class Test {
       //System.out.println(G.M()/ (0.5*(n-1)));
 
       SimpleSearch D = new SimpleSearch(n);
-      D.setSmall();
+      D.G = G;
+      D.setOneWay();
       //DivideAndConquer D = new DivideAndConquer(n);
 
       //System.out.println(totalEdges/(i + 1));
@@ -169,6 +214,30 @@ class Test {
       System.out.println(totAv/(i+1));
     }
   }
+
+  private static String toString(double array[])
+    {
+        return toString(array, Locale.ENGLISH, "%.5f");
+    }
+
+    private static String toString(double array[], Locale locale, String format)
+    {
+        if (array == null)
+        {
+            return "null";
+        }
+        StringBuilder sb = new StringBuilder("[");
+        for (int i=0; i<array.length; i++)
+        {
+            if (i > 0)
+            {
+                sb.append(", ");
+            }
+            sb.append(String.format(locale, format, array[i]));
+        }
+        sb.append("]");
+        return sb.toString();
+    }
 
   // test different simple algorithms on random DAGs
   public static void testSimpleSearch(int n, int runs) {

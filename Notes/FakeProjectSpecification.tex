@@ -1,0 +1,129 @@
+\documentclass{article}
+
+% packages
+\usepackage[utf8]{inputenc}
+%\usepackage[linesnumbered,lined,boxed,commentsnumbered]{algorithm2e}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{dsfont}
+\usepackage{dirtytalk} % to quote stuff
+
+\usepackage{calrsfs}
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+
+% definitions and commands
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}[theorem]{Definition}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+\voffset = -20pt % defaults to 0pt
+\textheight = 581pt % defaults to 561pt
+\hoffset = -10pt % defaults to 0pt
+\textwidth = 375pt % defaults to 355pt
+
+\title{- CS344 Project Specification - \\  Incremental Cycle Detection \& Topological Ordering }
+\author{Martin Costa}
+\date{October 2020}
+
+\begin{document}
+
+\maketitle
+
+\section{Problem}
+
+Cycle detection in directed graphs is one of the classic problems studied in algorithmic graph theory. The problem is simple, given some directed graph $G$, does it contain a cycle? In this project I will be considering a dynamic version of this problem, where we are given a graph that initially has no edges (and hence no cycles) which is updated over time by a sequence of edge insertions. After each edge is inserted, we must return whether or not the updated graph is acyclic. This problem is referred to as \textit{incremental cycle detection}.
+
+Suppose we have some DAG $G$ and we insert an edge into $G$ to obtain $G^{\star}$. It turns out that if we have access to a topological ordering $\prec$ of $G$, and we have an algorithm that we can use to compute a topological ordering $\prec^{\star}$ of $G^{\star}$ using $\prec$, then this can be used (with a small amount of overhead) to obtain an incremental cycle detection algorithm. Because of this, the problems of incremental cycle detection and \textit{incremental topological ordering} go hand in hand.
+
+These are the two problems that I will be exploring throughout my project. I will be surveying the current state of the problems, going over the major results, describing state of the art algorithms, and trying to make my own observations along the way.
+
+\section{Objectives}
+
+I have two main aims with this project. The first is to survey the problem of incremental cycle detection and topological ordering by reading and understanding the relevant literature on the topic. There are dozens of papers on this subject spanning several decades, but at their core, many of the algorithms and approaches in these papers rely on the same ideas. I plan on going over some of these ideas, giving descriptions of various algorithms that solve the problem efficiently, explaining their fundamental ideas at a high level but still formally stating important Lemmas and Theorems and outlining their proofs in a clear and intuitive way.
+
+My second aim is to try and make some original observations as I go through and survey the papers. Ideally I would like to create a new candidate framework to solve the problem, use it to design an algorithm, and test some metrics on this algorithm, seeing how they compare to some of the other algorithms in the literature. After talking with my supervisor, I am also aware that there are various open problems related to this topic, mainly focused on obtaining ploy-log amortized update time or poly-log amortized \textit{recourse}, a metric related to update time, in certain settings. It may be interesting to look into this and consider certain settings, such as the \textit{random order arrival model}. However, it is likely that this is outside the scope of this project.
+
+\section{Methodology}
+
+I will first go about my project by reading some of the core papers on the topic, such as [HKMST11] and [BFG09], to start developing my intuition and understanding of the topic, seeing what types of arguments are used to solve the problem. I will then read some of the newer papers on the problem, such as [BFGT11], [BC18] and [BK18], and compare them to the algorithms that I have already understood and interpreted, extracting the core ideas from them. Throughout this whole process I will be thinking about how the notions presented in the papers can me modified and extended in order to tackle some of the open questions in the area that I briefly mentioned before. I plan on having regular (weekly) discussions with my supervisor about the literature that I go through, as well as any ideas that I come up with.
+
+\section{Timetable}
+
+As I have discussed with my supervisor, due to the many important responsibilities that I will have over the next few months, I am not able to come up with a very detailed timetable that I will be following at this moment. However, I have already started reading the papers and plan to have read through most of them by the end of this term. I will write up any observations that I make, as well as my interpretations of the algorithms, as I read through the papers. This will hopefully make it easy to produce the final report (and the progress report) once I have finished going through everything and have a good understanding of the problem. I plan on having the bulk of the project done by the end of February, leaving me time to focus purely on doing my own research on the problem to see if I can make some original observations or develop any ideas that I come up with while reading through the papers. If any delays do occur, it may reduce the amount of time that I have to do my own research on the problem, but this is not essential to the project so it should not cause any real problems.
+
+The following dates are the deadlines that I will be meeting with the different parts of my project. As I work on the project this list will be expanded with more detailed objectives and dates.
+
+\begin{flushleft}
+    Term 1
+    \newline
+    
+    24$^{th}$ Oct. Finish reading through 1 paper.
+    
+    7$^{th}$ Nov. Finish reading through 2 papers and making notes on 1 paper.
+    
+    21$^{th}$ Nov. Finish reading through 3 papers and making notes on 2 papers.
+    
+    23$^{th}$ Nov. Decide on some parts of the problem I want to try and expand on.
+    
+    25$^{th}$ Nov. Finish the progress report.
+    
+    5$^{th}$ Dec. Finish reading through 4 papers and making notes on 3 papers.
+    \newline
+    
+    Term 2
+    \newline
+    
+    16$^{th}$ Jan. Finish reading through all the papers and making notes on them.
+    
+    17$^{th}$ Jan. Start doing my own research on the problem.
+    
+    15$^{th}$ Mar. Finish preparing the presentation.
+    
+    11$^{th}$ Apr. Finish the first draft of the final report.
+    
+    1$^{st}$ May. Finish the final report.
+\end{flushleft}
+
+\section{Resources}
+
+Being a mostly theoretical research project I will not need any resources that aren't readily available to most students. I only need access to Python and Java to run code and carry out some tests.
+
+\section{Legal, Social and Ethical and Issues}
+
+Being a mostly theoretical research project that will not involve working with people apart from my supervisor, I did not not need to consider any legal, social or ethical issues.
+
+\section{References}
+
+\begin{flushleft}
+[BK18] Sayan Bhattacharya and Janardhan Kulkarni. \say{An Improved Algorithm for Incremental Cycle Detection and Topological Ordering in Sparse Graphs}.
+\newline
+
+[HKMST11] Bernhard Haeupler, Telikepalli Kavitha, Rogers Mathew, Siddhartha Sen, and Robert E. Tarjan. \say{Faster Algorithms for Incremental Topological Ordering}.
+\newline
+
+[BC18] Aaron Bernstein and Shiri Chechik. \say{Incremental Topological Sort and Cycle Detection in Expected $\tilde{\pazocal O}(m \sqrt{n})$ Total Time}.
+\newline
+
+[BFG09] Michael A. Bender, Jeremy T. Fineman, and Seth Gilbert. \say{A new approach to incremental topological ordering}.
+\newline
+
+[BFGT11] Michael A. Bender, Jeremy T. Fineman, Seth Gilbert, and Robert E. Tarjan. \say{A New Approach to Incremental Cycle Detection and Related Problems}.
+\end{flushleft}
+
+\end{document}
+
+\section{Resources}
+
+I will need some paper and at least 3 pencils which have already been acquired. I am currently looking into obtaining a pencil sharpener.
+
+\section{Legal Issues}
+
+I do not (currently) plan on committing any crimes throughout the course of this project.
