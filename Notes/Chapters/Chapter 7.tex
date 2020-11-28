@@ -7,6 +7,7 @@
 \usepackage{amssymb}
 \usepackage{enumerate}
 \usepackage{graphicx}
+\usepackage[margin=1.4in]{geometry}
 
 \usepackage{calrsfs}
 \DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
@@ -22,16 +23,13 @@
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
 \newcommand{\polylog}{\: \mathrm{polylog} \:}
 
-\voffset = -20pt % defaults to 0pt
-\textheight = 581pt % defaults to 561pt
-\hoffset = -10pt % defaults to 0pt
-\textwidth = 375pt % defaults to 355pt
-
-\title{Upper Bounds on Expected Recourse of Incremental Cycle Detection Algorithms (Draft 2)}
+\title{Expected Recourse of Incremental Cycle Detection Algorithms}
 \author{Martin Costa}
 \date{August 2020}
 
 \begin{document}
+
+\maketitle
 
 \chapter{Expected Recourse Bounds for Trees under Adversarial Arrival}
 
@@ -141,7 +139,7 @@ Initially this function $\Gamma$ may seem quite obscure, unlike the definition o
 
 \begin{figure}[htp]
     \centering
-    \includegraphics[width=12cm]{ActSeqPic.png}
+    \includegraphics[width=14cm]{Images/ActSeqPic.png}
     \caption{This figure represents an activation sequence $\alpha$ with the different coloured nodes; the black, red, orange, yellow, lime and cyan nodes represent $\alpha_{\phi_0},...,\alpha_{\phi_5}$ respectively. The nodes outlined in red are the nodes contained in the sequence $(u_j)_{j=0}^k$, the function $\Gamma$ counts exactly these nodes, excluding the root node, which is the black node in this diagram.}
     \label{fig:activationsequence}
 \end{figure}

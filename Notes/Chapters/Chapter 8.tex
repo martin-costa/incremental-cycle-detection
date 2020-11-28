@@ -1,0 +1,223 @@
+\documentclass{report}
+
+% packages
+\usepackage[utf8]{inputenc}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{graphicx}
+\usepackage[margin=1.4in]{geometry}
+\usepackage{xcolor}
+
+\usepackage{calrsfs}
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+
+% definitions and commands
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\DeclareMathOperator*{\polylog}{polylog}
+
+\title{Upper Bounds on Expected Recourse of Incremental Cycle Detection Algorithms (Draft 2)}
+\author{Martin Costa}
+\date{August 2020}
+
+\begin{document}
+
+\chapter{Extending the Activation Sequence Framework}
+
+\section{Extending Lemma \ref{gamma lemma 2} to DAGs}
+
+In the previous chapter we saw that Lemma \ref{gamma lemma 2} gave us an equivalence between values of the function $\Gamma$ and the recourse of $\pazocal A_1$ trees. We also noted that this could be used to obtain a lower bound for the recourse of $\pazocal A_1$ on any DAG. The main result of this chapter will be an extension of this result to DAGs, allowing us fully characterize the recourse of $\pazocal A_1$ on any DAG in terms of values of $\Gamma$. Using this result we will give a reduction from Conjecture \ref{mainconjecture} to a Conjecture analogous to Lemma \ref{gamma lemma 1}. 
+
+Let $G=(V,E)$ be a DAG with root $r$ and let $\prec_0 \: \in \mathcal S_V$ be some initial ordering.
+
+\begin{definition}
+Given some $\pazocal E \in \mathcal S_E$ and some $\prec \: \in \mathcal S_V$, we say that some node $u \in V$ is \textbf{relevant} in $\prec$ with respect to $\pazocal E$ if $\Gamma(act(\pazocal E), \prec)$ counts $u$.
+\end{definition}
+
+\section{Main Observation}
+
+\begin{proposition}\label{mainobservation} Let $x^+=max(x,0)$. We can obtain the following equation from the definition of the $\Gamma$ function.
+\[ rec_r(\pazocal E, \prec_0) =  \sum_{t=1}^{m}\big(\Gamma(act(\pazocal E), \prec_{t}) - \Gamma(act(\pazocal E), \prec_{t-1})\big)^+ + \Gamma(act(\pazocal E), \prec_0) \]
+\end{proposition}
+
+Before giving proving this we will need the following Lemma.
+
+\begin{lemma} Let $\pazocal E \in \mathcal S_E$. Then
+\[ \Gamma(act(\pazocal E), \prec_{t}) < \Gamma(act(\pazocal E), \prec_{t-1}) \implies \Gamma(act(\pazocal E), \prec_{t}) = \Gamma(act(\pazocal E), \prec_{t-1}) - 1  \]
+\end{lemma}
+
+\begin{proof}
+Let $\pazocal U = \{u_1,...,u_k\}$ be the set of nodes relevant in $\prec_{t-1}$ with respect to $\pazocal E$. Given any $u_i,u_j \in \pazocal U$, we know that $u_i$ and $u_j$ are activated at different times. We also know that given any $u_i \in \pazocal U$ we have that $r \prec_t u_i$ if and only if $u_i$ is activated at time $t$. Now suppose that $\Gamma(act(\pazocal E), \prec_{t}) < \Gamma(act(\pazocal E), \prec_{t-1}) - 1$, then there are (at least) two nodes $u_i, u_j \in \pazocal U$ that are not relevant in $\prec_t$ with respect to $\pazocal E$, this means that both $u_i$ and $u_j$ were activated at time $t$, but $u_i$ and $u_j$ must be activated at different times, so we get a contradiction. It follows that $\Gamma(act(\pazocal E), \prec_{t}) \geq \Gamma(act(\pazocal E), \prec_{t-1}) - 1$, so we have that $\Gamma(act(\pazocal E), \prec_{t}) = \Gamma(act(\pazocal E), \prec_{t-1}) - 1$.
+\end{proof}
+
+\begin{proof}[\textbf{Proof of Proposition \ref{mainobservation}}]
+Fix some $\pazocal E \in \mathcal S_E$. By the construction of $\Gamma$, after the insertion of the edge $\pazocal E_{t-1}$, we have that $\Gamma(act(\pazocal E), \prec_{t}) < \Gamma(act(\pazocal E), \prec_{t-1})$ if and only if $r$ is moved during the insertion of $\pazocal E_{t-1}$. By Lemma 1, this tells us that
+\[ rec_r(\pazocal E, \prec_{0})_t = 1 \iff \Gamma(act(\pazocal E), \prec_{t}) = \Gamma(act(\pazocal E), \prec_{t-1}) - 1 \]
+So we can form the equation
+\[ rec_r(\pazocal E, \prec_0) =  \sum_{t=1}^{m}\big(\Gamma(act(\pazocal E), \prec_{t-1}) - \Gamma(act(\pazocal E), \prec_{t})\big)^+ \]
+Since the expression on the right hand side counts the total amount that $\Gamma(act(\pazocal E), \prec_{t})$ \textit{decreases} as we increase $t$ from $1$ to $m$, and we know that $\Gamma(act(\pazocal E), \prec_{m}) = 0$, we can see that this is equal to the starting value $\Gamma(act(\pazocal E), \prec_0)$ and the total amount that $\Gamma(act(\pazocal E), \prec_{t})$ \textit{increases} as we increase $t$ from $1$ to $m$. Hence, we get that
+\[ rec_r(\pazocal E, \prec_0) =  \sum_{t=1}^{m}\big(\Gamma(act(\pazocal E), \prec_{t}) - \Gamma(act(\pazocal E), \prec_{t-1})\big)^+ + \Gamma(act(\pazocal E), \prec_0) \]
+\end{proof}
+
+\section{Main Lemmas}
+
+\begin{lemma}[\color{red}{UNPROVEN}\color{black}] Given any $\prec \: \in \mathcal S_V$ we have that
+\[ \mathbb E_{\pazocal E \in \mathcal S_E}[\Gamma(act(\pazocal E), \prec)] = \polylog n \]
+\end{lemma}
+
+We define \textit{incomplete insertion sequences} of $G$ as proper subsequences of insertion sequences. We also define \textit{incomplete activation sequences} analogously and extend the domain of $\Gamma$ to these sequences.
+
+\begin{lemma}[\color{red}{UNPROVEN}\color{black}]
+Let $E_1$ and $E_2$ be any partition of $E$. Given any $\pazocal E \in \mathcal S_{E_1}$ and any $\prec \: \in \mathcal S_V$ we have that
+\[ \mathbb E_{\pazocal F \in \mathcal S_{E_2}}[\Gamma(act(\pazocal E \pazocal F), \prec) - \Gamma(act(\pazocal E), \prec)] = \polylog{\vert E_2 \vert} \]
+\end{lemma}
+
+Here $\pazocal{EF}$ denotes the insertion sequence obtained by appending $\pazocal F$ to the end of $\pazocal E$. We can see that Lemma 1 follows from Lemma 2 by letting $E_1 = \varnothing$ and $E_2 = E$. Notice that if $(E_1, E_2)$ is a non-trivial partition of $E$ then $\pazocal E$ and $\pazocal F$ will be incomplete.
+
+% \begin{lemma}[\color{red}{UNPROVEN}\color{black}]
+% Let $\{E_1,...,E_k\}$ be any partition of $E$. Let $\pazocal S \in [k]^m$ be any sequence containing exactly $\vert E_i \vert$ many $i$ for each $i \in [k]$. We call such a sequence an \textbf{instruction sequence} for $\{E_1,...,E_k\}$. We say that $\pazocal E \in \mathcal S_E$ agrees with $\pazocal S$ if we have that for all $i \in [m]$, $\pazocal E_i \in E_{\pazocal S_i}$. Given any $\prec \: \in \mathcal S_V$ we have that
+% \[ \mathbb E_{\pazocal F \in \mathcal S_{E_2}}[\Gamma(act(\pazocal E \pazocal F), \prec) - \Gamma(act(\pazocal E), \prec)] = \polylog{\vert E_2 \vert} \]
+% \end{lemma}
+
+The intuition for Lemma 3 is as follows. Suppose we have inserted any $t-1$ edges in any order and consider the current state of the graph and ordering. We care about the number of uninserted edges in the graph with startpoints to the right of the root, denote this quantity by $\Phi$. Consider the two following scenarios.
+
+\paragraph{The number right critical edges to $r$ is low}
+
+Then we expect many insertions to occur before a right critical insertion to $r$, and hence we expect the value of $\Phi$ to decrease considerably before $\Gamma$ counts another node.
+
+\paragraph{The number right critical edges to $r$ is high}
+
+Then we expect the next insertion to move many nodes to the right, since many nodes will have outgoing edges that will cause the root to move, and hence we expect the value of $\Phi$ to decrease considerably.
+
+My idea is to construct some potential function that captures these ideas formally. Since in both of these cases we can see that the expected recourse should be low, the idea is to try and somehow balance both properties so that the expected recourse is always low.
+
+\begin{proposition}
+Given any potentially incomplete insertion sequence $\pazocal E$ of $G$ of length $t$, we have that
+\[ \Gamma(act(\pazocal E),\prec_t) = 0 \]
+\end{proposition}
+
+\begin{proof}
+Suppose that $\Gamma(act(\pazocal E),\prec_t) > 0$, then some node $u$ is relevant in $\prec_t$ with respect to $\pazocal E$. This implies that $r \prec_t u$ and that for some $i \leq t$ the insertion of $\pazocal E_i$ causes $u$ to be activated, but after $u$ is activated we know that it must appear before $r$ in the ordering, in other words, for all $j \geq i$ we have $u \prec_j r$. But this tells us that $u \prec_t r$, giving us a contradiction.
+\end{proof}
+
+\begin{definition}
+Let $\pazocal E \in \mathcal S_E$, $t \in [m]$, we define the following functions.
+
+\begin{enumerate}
+    \item Let $\chi_t(\pazocal E, \prec_0)$ be the indicator function for the event that $\Gamma(act(\pazocal E), \prec_{t}) > \Gamma(act(\pazocal E), \prec_{t-1})$
+    \item Let $\lambda_t(\pazocal E, \prec_0)$ be the indicator function for the event that $\pazocal E_{t}=(u,v)$ where $u$ is relevant in $\prec_{t-1}$ with respect to $\pazocal E$
+    \item Let $\Lambda_t(\pazocal E, \prec_0) = \big(\Gamma(act(\pazocal E), \prec_{t}) - \Gamma(act(\pazocal E), \prec_{t-1})\big)^+$
+\end{enumerate}
+
+\end{definition}
+
+\begin{proposition}
+Let $\pazocal E \in \mathcal S_E$, $t \in [m]$, then \[\chi_t(\pazocal E, \prec_0) \leq \lambda_t(\pazocal E, \prec_0)\]
+\end{proposition}
+
+\begin{proof}
+If $\pazocal E$ is such that $\Gamma(act(\pazocal E), \prec_{t}) > \Gamma(act(\pazocal E), \prec_{t-1})$, then we have that $\pazocal E_{t-1}=(u,v)$ where $u$ is some node counted by $\Gamma(act(\pazocal E), \prec_{t-1})$. This means that $\chi_t(\pazocal E, \prec_0) \leq \lambda_t(\pazocal E, \prec_0)$.
+\end{proof}
+
+We now need the following Lemmas.
+
+\begin{lemma}
+Suppose we have inserted some incomplete insertion sequence $\pazocal E = (\pazocal E_1,...,\pazocal E_{t-1})$ into the graph. Let $F$ be the edges that remain to be inserted. Then we have that
+\[ \mathbb E_{\pazocal F \in \mathcal S_F} [\lambda_t(\pazocal E \pazocal F, \prec_0)] \leq \frac{\Delta\polylog n}{m-t+1} \]
+\end{lemma}
+
+\begin{proof}
+Let $V=\{x_1,...,x_n\}$. By Lemma 3 we can see that
+\[ \mathbb E_{\pazocal F \in \mathcal S_F}[\Gamma(act(\pazocal E \pazocal F), \prec_{t-1})] = \mathbb E_{\pazocal F \in \mathcal S_F}[\Gamma(act(\pazocal E \pazocal F), \prec_{t-1}) - \Gamma(act(\pazocal E), \prec_{t-1})] = \polylog n \] 
+Suppose the rest of the edges are inserted uniformly at random. Let $p(x_i)$ be the probability that $x_i$ is relevant in $\prec_{t-1}$. We can see that
+\[ p(x_1) +...+p(x_n) =  \mathbb E_{\pazocal F \in \mathcal S_F}[\Gamma(act(\pazocal E \pazocal F), \prec_{t-1})] = \polylog n \]
+Since $\pazocal E_t=(u,v)$ is equally likely to be any of the edges in $F$ and each node has at most $\Delta$ outgoing edges, we get that
+\[ \mathbb E_{\pazocal F}[\lambda_t(\pazocal E \pazocal F, \prec_0)] = p(x_1) \cdot \mathbb P[u=x_1]+...+ p(x_n) \cdot \mathbb P[u=x_n]\]
+\[ \leq p(x_1) \cdot \frac{\Delta}{m-t+1}+...+ p(x_n) \cdot \frac{\Delta}{m-t+1} =\frac{\Delta\polylog n}{m-t+1}\]
+\end{proof}
+
+Since $\chi_t = 0$ if and only if $\Lambda_t = 0$, and $\chi_t \leq \lambda_t$, we can see that $\mathbb E_{\pazocal E} [\Lambda_t(\pazocal E, \prec_0) \vert \lambda_t(\pazocal E, \prec_0) = 0] = 0$. Hence, given some potentially incomplete insertion sequence $\pazocal E$ and $F=E \setminus \{\pazocal E_t\}$ we have
+
+\[ \mathbb E_{\pazocal F \in \mathcal S_F} [\lambda_t(\pazocal E \pazocal F, \prec_0)]  = \mathbb E_{\pazocal F} [\Lambda_t(\pazocal E \pazocal F, \prec_0) \vert \lambda_t(\pazocal E \pazocal F, \prec_0) = 1] \cdot \mathbb P_{\pazocal F} [\lambda_t(\pazocal E \pazocal F, \prec_0) = 1] \]
+
+\[ \leq \mathbb E_{\pazocal F} [\Lambda_t(\pazocal E \pazocal F, \prec_0) \vert \lambda_t(\pazocal E \pazocal F, \prec_0) = 1] \cdot \frac{\Delta\polylog n}{m-t+1} \]
+
+\begin{lemma} Suppose we have inserted the incomplete insertion sequence $\pazocal E = (\pazocal E_1,...,\pazocal E_{t-1})$ into the graph. Let $F$ be the edges that remain to be inserted. Then we have that
+\[ \mathbb E_{\pazocal F \in \mathcal S_F} [\Lambda_t(\pazocal E \pazocal F, \prec_0) \vert \lambda_t(\pazocal E \pazocal F, \prec_0) = 1] = \polylog n\]
+\end{lemma}
+
+This would yield the conjecture.
+
+\section{Proof of Lemma 5}
+
+We denote the incomplete activation sequence of some potentially incomplete insertion sequence $\pazocal F$ starting after the insertion of some potentially incomplete insertion sequence $\pazocal E$ by $act(\pazocal E, \pazocal F)$. We define $\Gamma$ on these in the same way as other incomplete activation sequences. Notice that $\Gamma(act(\pazocal E, \pazocal F), \prec) = \Gamma(act(\pazocal E\pazocal F), \prec) - \Gamma(act(\pazocal E), \prec)$.
+
+\subsection{Outline of Proof}
+
+Suppose we have inserted the incomplete insertion sequence $\pazocal E = (\pazocal E_1,...,\pazocal E_{t-1})$ into the graph and let $F=E \setminus \{\pazocal E_t\}$. In this context, given some $\pazocal F \in \mathcal S_F$ let $\overline{\pazocal F}$ denote $\pazocal{EF}$ and assume that $t \leq m$. Let $S \subseteq \mathcal S_F$ be the set of incomplete insertion sequences $\pazocal F$ such that $\overline{\pazocal F}_t=(u,v)$ where $u$ is relevant in $\prec_{t-1}$, in other words, such that $\lambda_t(\overline{\pazocal F}, \prec_0)=1$. We assume that $\Lambda_t \geq 0$. Let $f \in F$, then let $S_f \subseteq S$ be the set of all $\pazocal F \in S$ such that $\overline{\pazocal F}_t = f$. Note that $S_f$ may be empty and that $\{ S_f \}_{f \in F}$ is a partition of $S$. The idea of this proof is to define an equivalence relation, $\simeq$, on $S_f$ (and hence on $S$) such that, given any $f \in F$, for any $\pazocal F^\star \in S_f$ we have
+\[ \mathbb E_{\pazocal F \in [\pazocal F^\star]_{\simeq}}[\Lambda_t(\overline{\pazocal F}, \prec_0)] = \polylog n \]
+
+Notice crucially that this expression requires $\prec_t$ to be defined, which is why we start by restricting to $S_f$. Once we have established this, we can construct a partition $P_1,...,P_k$ of $S$ such that for all $i \in [k]$ we have $\mathbb E_{\pazocal F \in P_i}[\Lambda_t(\overline{\pazocal F}, \prec_0)] = \polylog n$ and it will follow that
+\[ \mathbb E_{\pazocal F \in \mathcal S_F} [\Lambda_t(\pazocal E \pazocal F, \prec_0) \vert \lambda_t(\pazocal E \pazocal F, \prec_0) = 1] = \mathbb E_{\pazocal F \in S} [\Lambda_t(\overline{\pazocal F}, \prec_0)]= \polylog n \]
+
+% \subsection{Proof}
+
+% We start off by defining $\simeq$ and proving that it defines an equivalence relation. Before doing so we must classify the edges in $F$ into 3 different types and give some more notation. Let $\prec_t \sim (y_1,...,y_{l_1},x_1,...,x_k,y_{l_1+1},...,y_{l_2})$ where the startpoint of $f$ is $x_1$ and $x_2,...,x_k$ are the nodes that incur a recourse during the insertion of $f$. We now define a partition $(A,B,C)$ of $F$ as follows.
+% \[A = \{(u,v)\in F : u \in \{y_i\}_{i=1}^{l_1} \} \quad \quad C = \{(u,v)\in F : u \in \{y_i\}_{i=l_1+1}^{l_2}  \} \]
+% \[ B = \{(u,v)\in F : u \in \{x_i\}_{i=1}^{k} \}\]
+
+% Given some $\pazocal F \in S_f$, we define $\tau(\pazocal F)$ to the number $i \in [m]$ such that $\overline{\pazocal F}_i$ is the first insertion that causes a node in $\{y_i\}_{i=l_1+1}^{l_2}$ to be activated.
+
+% Let $f \in F$ and $\pazocal F, \pazocal F^\star \in S_f$. We say that $\pazocal F \simeq \pazocal F^\star$ if the following hold.
+
+% \begin{enumerate}
+%     \item $\tau(\pazocal F) = \tau(\pazocal F^\star)$
+%     \item $\pazocal F^\star$ can be obtained by starting with $\pazocal F$ and permuting the positions of the edges in $\pazocal F$ that appear strictly before the edge $\overline{\pazocal F}_i$ with $i=\tau(\pazocal F)$ and are contained in $B$.
+% \end{enumerate}
+
+% The fact that permuting edges as described in property 2 doesn't change the value of $\tau(\pazocal F)$ can be used to show that $\simeq$ is an equivalence relation on $S_f$. This can be proven using the \textit{memoryless} property of activation sequences, in other words, the fact that the activation sequence after some point only depends on the order in which the remaining edges will be inserted and does not depend on the order in which the edges already in the graph were inserted.
+
+% Now let $\pazocal F^\star \in S_f$ and let $P=[\pazocal F^\star]_{\simeq}$. We will see that $\mathbb E_{\pazocal F \in P}[\Lambda_t(\overline{\pazocal F}, \prec_0)] = \polylog n$. This will follows from the following facts.
+
+% \begin{enumerate}
+%     \item any node $y \in \{y_i\}_{i=1}^{l_2}$ is relevant in $\prec_{t-1}$ if and only it is relevant in $\prec_t$ with respect to any insertion sequence in $S_f$. This tells us that $\Lambda_t$ is the difference in the number of node  s from $\{x_i\}$ relevant in $\prec_t$ and $\prec_{t-1}$.
+%     \item given some $\pazocal F \in S_f$, any insertion occurring strictly after $\tau(\pazocal F)$ will have no effect on which nodes from $\{x_i\}$ are relevant in $\prec_{t}$.
+% \end{enumerate}
+
+\subsection{Proof}
+
+We start off by defining $\simeq$ and proving that it defines an equivalence relation. Fix some $f \in F$ and let $\prec_t \sim (y_1,...,y_{l_1},x_1,...,x_k,y_{l_1+1},...,y_{l_2})$ where the startpoint of $f$ is $x_1$ and $x_2,...,x_k$ are the nodes that incur a recourse during the insertion of $f$.
+
+Given some $\pazocal F \in S_f$, we define $\tau_1(\pazocal F)$ to the number $i \in [m]$ such that $\overline{\pazocal F}_i$ is the first insertion that causes a node in $\{x_1\}_{j=1}^{k}$ to be activated. Similarly, we define $\tau_2(\pazocal F)$ to the number $i \in [m]$ such that $\overline{\pazocal F}_i$ is the first insertion that causes a node in $\{y_j\}_{j=l_1+1}^{l_2}$ to be activated. Since $x_1$ is relevant in $\prec_{t-1}$, and if $x_j$ is active at time $s \geq t$ then $x_1$ is too, it follows that $\tau_1(\pazocal F) < \tau_2(\pazocal F)$.
+
+\begin{definition}
+Let $f \in F$ and $\pazocal F, \pazocal F^\star \in S_f$. We say that $\pazocal F \simeq \pazocal F^\star$ if the following hold.
+
+\begin{enumerate}
+    \item $\tau_1(\pazocal F) = \tau_1(\pazocal F^\star)$ and $\tau_2(\pazocal F) = \tau_2(\pazocal F^\star)$
+    \item $\pazocal F^\star$ can be obtained by starting with $\pazocal F$ and permuting the positions of the edges in $\pazocal F$ that appear strictly between the edges $\overline{\pazocal F}_i$ and $\overline{\pazocal F}_j$ with $i=\tau_1(\pazocal F)$ and $j=\tau_2(\pazocal F)$.
+\end{enumerate}
+\end{definition}
+
+The fact that permuting edges as described doesn't change the value of $\tau_1(\pazocal F)$ or $\tau_2(\pazocal F)$ can be used to show that $\simeq$ is an equivalence relation on $S_f$. This can be proven using the \textit{memoryless} property of activation sequences, in other words, the fact that the activation sequence after some point only depends on the order in which the remaining edges will be inserted and does not depend on the order in which the edges already in the graph were inserted.
+
+Let $\pazocal F \in S_f$ and let $i=\tau_1(\pazocal F)$ and $j=\tau_2(\pazocal F)$. An important observation is that any node $y \in \{y_i\}_{i=1}^{l_2}$ is relevant in $\prec_{t-1}$ if and only it is relevant in $\prec_t$ with respect to $\overline{\pazocal F}$. This tells us that $\Lambda_t$ is the difference in the number of nodes from $\{x_i\}$ relevant in $\prec_t$ and $\prec_{t-1}$. This difference can only be created by the edged contained strictly between $\overline{\pazocal F}_i$ and $\overline{\pazocal F}_j$. Let $\overline{\pazocal F}^1 = (\overline{\pazocal F}_1,...,\overline{\pazocal F}_i)$, $\overline{\pazocal F}^2 = (\overline{\pazocal F}_{i+1},...,\overline{\pazocal F}_{j-1})$ and $\overline{\pazocal F}^3 = (\overline{\pazocal F}_{j+1},...,\overline{\pazocal F}_m)$. Then we have that
+
+\[ \Lambda_t(\overline{\pazocal F}, \prec_0) = \Gamma(act(\overline{\pazocal F}), \prec_{t}) - \Gamma(act(\overline{\pazocal F}), \prec_{t-1}) \]
+\[ =\big(\Gamma(act(\overline{\pazocal F}^1), \prec_{t}) + \Gamma(act(\overline{\pazocal F}^1, \overline{\pazocal F}^2), \prec_{t}) + \Gamma(act(\overline{\pazocal F}^1\overline{\pazocal F}^2, \overline{\pazocal F}^3), \prec_{t}) \big) \]
+\[ - \big(\Gamma(act(\overline{\pazocal F}^1), \prec_{t-1}) + \Gamma(act(\overline{\pazocal F}^1, \overline{\pazocal F}^2), \prec_{t-1}) + \Gamma(act(\overline{\pazocal F}^1\overline{\pazocal F}^2, \overline{\pazocal F}^3), \prec_{t-1}) \big)\]
+\[ = \Gamma(act(\overline{\pazocal F}^1, \overline{\pazocal F}^2), \prec_{t}) - \Gamma(act(\overline{\pazocal F}^1, \overline{\pazocal F}^2), \prec_{t-1}) \leq \Gamma(act(\overline{\pazocal F}^1, \overline{\pazocal F}^2), \prec_{t}) \]
+
+Let $\pazocal F^\star \in S_f$ and let $P=[\pazocal F^\star]_{\simeq}$. Given any $\pazocal F \in P$, $\overline{\pazocal F}^1 = (\overline{\pazocal F}^\star)^1$. So we get that $ \mathbb E_{\pazocal F \in P} [\Gamma(act(\overline{\pazocal F}^1, \overline{\pazocal F}^2), \prec_{t})] = \polylog n$ by Lemma 3. This is because $\overline{\pazocal F}^1$ is a fixed incomplete insertion sequence for all $\pazocal F \in P$, and because the (multi) set of incomplete insertion sequences $\overline{\pazocal F}^2$ corresponding to $\pazocal F \in P$ is exactly all incomplete insertion sequences over the edges contained in $(\overline{\pazocal F}^\star)^2$.
+\[ \mathbb E_{\pazocal F \in P} [\Lambda_t(\overline{\pazocal F}, \prec_0)] \leq \mathbb E_{\pazocal F \in P} [\Gamma(act(\overline{\pazocal F}^1, \overline{\pazocal F}^2), \prec_{t})] = \polylog n \]
+
+
+\end{document}

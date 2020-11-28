@@ -88,7 +88,6 @@ public class SimpleSearch {
     forward.restrictedDFS(v, S, F);
 
     boolean isRightCrit = false;
-
     if (F.contains(tracedNode)) {
       rightCritical++;
       isRightCrit = true;
@@ -97,38 +96,20 @@ public class SimpleSearch {
     // ONE WAY SEARCH:
     if (rearrageType == 3) {
 
-      Random rnd = new Random();
+      ArrayList<Integer> orderF = new ArrayList<Integer>();
 
-      if (rnd.nextDouble() <= 0) {
-        ArrayList<Integer> orderB = new ArrayList<Integer>();
+      // move F to the right of u
+      // get ordering of F
+      orderF.addAll(order);
+      orderF.retainAll(F);
 
-        // move B to the left of v
-        // get ordering of B
-        orderB.addAll(order);
-        orderB.retainAll(B);
+      // fix ordering
+      order.removeAll(F);
+      order.addAll(end - F.size() + 1, orderF);
 
-        // fix ordering
-        order.removeAll(B);
-        order.addAll(start, orderB);
+      totalRecourse += F.size();
 
-        totalRecourse += B.size();
-      }
-      else {
-        ArrayList<Integer> orderF = new ArrayList<Integer>();
-
-        // move F to the right of u
-        // get ordering of F
-        orderF.addAll(order);
-        orderF.retainAll(F);
-
-        // fix ordering
-        order.removeAll(F);
-        order.addAll(end - F.size() + 1, orderF);
-
-        totalRecourse += F.size();
-
-        if (F.contains(tracedNode)) rec++;
-      }
+      if (F.contains(tracedNode)) rec++;
     }
 
     // TWO WAY GREEDY:

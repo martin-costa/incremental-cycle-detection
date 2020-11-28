@@ -238,25 +238,34 @@ public class Graph {
   }
 
   // generates a DAG on n nodes
-  public static Graph generateDAG(int n, double p) {
+  public static Graph generateDAG(int n, double lambda) {
+
+    // generate a completely random order of all edges in Kn (excluding loops)
+    // insert the first lambda*n of them that we can insert without creaing a cycle
 
     Graph G = new Graph(n);
+    int inserted = 0;
+
     Random rnd = new Random();
 
-    // generate a random permutation
-    ArrayList<Integer> perm = new ArrayList<Integer>(n);
-    for (int i = 0; i < n; i++) {
-      perm.add(i);
-    }
-    java.util.Collections.shuffle(perm);
+    ArrayList<Edge> edges = new ArrayList<Edge>((int)lambda*n);
 
-    for (int i = 0; i < n; i++) {
-      for (int j = i+1; j < n; j++) {
-        if (rnd.nextDouble() < p) {
-          G.addEdge(perm.get(i), perm.get(j));
-        }
+    while(inserted < lambda*n) {
+      Edge e = new Edge(rnd.nextInt(n), rnd.nextInt(n));
+
+      if (e.l == e.r || edges.contains(e)) continue;
+
+      G.addEdge(e.l, e.r);
+
+      if (!G.isAcyclic()) {
+        G.removeEdge(e.l, e.r);
+      }
+      else {
+        edges.add(e);
+        inserted++;
       }
     }
+    
     return G;
   }
 

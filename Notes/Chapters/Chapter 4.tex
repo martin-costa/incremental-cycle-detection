@@ -10,6 +10,7 @@
 \usepackage{enumerate}
 \usepackage{dsfont}
 \usepackage{graphicx}
+\usepackage[margin=1.4in]{geometry}
 
 \usepackage{calrsfs}
 \DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
@@ -24,11 +25,6 @@
 \newtheorem{definition}[theorem]{Definition}
 
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
-
-\voffset = -20pt % defaults to 0pt
-\textheight = 581pt % defaults to 561pt
-\hoffset = -10pt % defaults to 0pt
-\textwidth = 375pt % defaults to 355pt
 
 \title{- CS344 Discrete Mathematics Project - \\  Incremental Cycle Detection \& Topological Ordering}
 \author{Martin Costa}
@@ -172,11 +168,11 @@ The \textit{simple greedy two-way search algorithm}, $\pazocal A_2$, is also a l
 
 \subsection{A comparison of $\pazocal A_1$ and $\pazocal A_2$}
 
-The algorithms $\pazocal A_1$ and $\pazocal A_2$ are very similar. The obvious difference is that $\pazocal A_1$ only performs one search while $\pazocal A_2$ performs two simultaneous searches. We say that $\pazocal A_2$ is a \textit{greedy} algorithm because it's strategy is roughly to try and minimize the number of node movements in a single update.
+The algorithms $\pazocal A_1$ and $\pazocal A_2$ are very similar. The obvious difference is that $\pazocal A_1$ only performs one search while $\pazocal A_2$ performs two simultaneous searches. We say that $\pazocal A_2$ is a \textit{greedy} algorithm because it's strategy is roughly to try and minimize the number of node movements in a single update. Figure \ref{fig:simplesearch} gives a visual representation of $\pazocal A_1$ and $\pazocal A_2$ both handling the same edge insertion.
 
 \begin{figure}[htp]
     \centering
-    \includegraphics[width=12cm]{Simple Algos.png}
+    \centerline{\includegraphics[width=16cm]{Simple Algos.png}}
     \caption{A comparison of the simple search algorithms, one-way search $\pazocal A_1$ (right), and greedy two-way search $\pazocal A_2$ (left), restoring the topological ordering after the insertion of $(u,v)$ by rearranging nodes in the affected region.}
     \label{fig:simplesearch}
 \end{figure}
@@ -187,22 +183,38 @@ There are many open problems related to incremental cycle detection and topologi
 
 \subsection{Random Order Arrival vs. Adversarial Arrival}
 
-In the \textit{random-order model} for online algorithms, the input is chosen by an \textit{adversary} but is randomly permuted before being presented to the algorithm. This process of randomizing the order of the input can often weaken the power of the adversary.\footnote{Gupta el al. give a good survey of the random-order model and many examples here [GS20]}
+In the \textit{random-order model} for online algorithms, the input is chosen by an \textit{adversary} but is randomly permuted before being presented to the algorithm. This process of randomizing the order of the input can often weaken the power of the adversary.\footnote{Gupta el al. give a good survey of the random-order model and many examples in their paper [GS20]}
 
-This model is very applicable in the context of incremental topological ordering; it's very natural to ask whether randomising the order of an insertion sequence before presenting it to some algorithm will provide is with improved algorithmic guarantees. My supervisor, Sayan Bhattacharya, has conjectured that the algorithms $\pazocal A_1$ and $\pazocal A_2$ have low expected recourse for any graph under random-order arrival. In contrast, note that insertion sequences leading to high recourse can easily be constructed under adversarial arrival. More formally, we have the following conjectures.
+This model is very applicable in the context of incremental topological ordering; it's very natural to ask whether randomising the order of an insertion sequence before presenting it to some algorithm will provide us with improved algorithmic guarantees. My supervisor, Sayan Bhattacharya, has conjectured that there exists an incremental topological ordering algorithm that has low expected recourse per insertion for any graph under random-order arrival. More formally, we have the following conjecture.
 
-\begin{conjecture}
+\begin{conjecture}\label{mainconjecture}
+Let $G=(V,E)$ be a DAG and $\prec \: \in \mathcal S_V$ any initial ordering of $G$, then there exists some incremental topological ordering algorithm such that it's recourse satisfies the following
+\[ \mathbb E_{\pazocal E \in \mathcal S_E}[rec(\pazocal E, \prec)] = \tilde{\pazocal O}(m) \]
+\end{conjecture}
+
+In fact, he has conjectured that the algorithms $\pazocal A_1$ and $\pazocal A_2$ have low expected recourse \textit{per node} (not just per insertion) for any graph under random-order arrival. In contrast, note that insertion sequences leading to high recourse can easily be constructed for both of these algorithms under adversarial arrival. More formally, we have the following conjectures.
+
+\begin{conjecture}\label{A1conjecture}
 Let $G=(V,E)$ be a DAG and $\prec \: \in \mathcal S_V$ any initial ordering of $G$, then the recourse of the simple one-way search algorithm, $\pazocal A_1$, satisfies the following
-\[ \mathbb E_{\pazocal E \in \mathcal S_E}[rec(\pazocal E, \prec)] = \tilde{\pazocal O} (n) \]
+\[ \mathbb E_{\pazocal E \in \mathcal S_E}[rec(\pazocal E, \prec)] = \tilde{\pazocal O}(n) \]
 \end{conjecture}
 
-\begin{conjecture}
+\begin{conjecture}\label{A2conjecture}
 Let $G=(V,E)$ be a DAG and $\prec \: \in \mathcal S_V$ any initial ordering of $G$, then the recourse of the simple greedy two-way search algorithm, $\pazocal A_2$, satisfies the following
-\[ \mathbb E_{\pazocal E \in \mathcal S_E}[rec(\pazocal E, \prec)] = \tilde{\pazocal O} (n) \]
+\[ \mathbb E_{\pazocal E \in \mathcal S_E}[rec(\pazocal E, \prec)] = \tilde{\pazocal O}(n) \]
 \end{conjecture}
+
+Since for both of these algorithms we can assume that the input graphs are weakly connected (it can be shown that the effect of either algorithm on some node $u \in V(G)$ only depends on the structure of $G[reach_G(u) \cup reach^{-1}_G(u)]$, so we only have to consider graphs which are weakly connected), we can assume without loss of generality that $m=\Omega(n)$. Hence, Conjecture \ref{A1conjecture} and \ref{A2conjecture} both individually imply Conjecture \ref{mainconjecture}.
 
 \subsection{Experimental Results}
 
-Before I started thinking about these problems, I implemented the algorithms $\pazocal A_1$ and $\pazocal A_2$ and tested them on graphs of different densities generated uniformly at random.\footnote{All the code for these implementations can be found at github.com/martin-costa/incremental-cycle-detection}
+Before I started thinking about these problems, I implemented the simple algorithms, $\pazocal A_1$ and $\pazocal A_2$, and tested them on many randomly generated graphs.\footnote{All the code for these implementations can be found at github.com/martin-costa/incremental-cycle-detection} All the data I collected supports both of these conjectures. Figure \ref{fig:recoursetests1} shows some of the data. I have not included the details of how I generated the DAGs or the insertion sequences since I want to focus on concrete results and not experimental data. However, I did try many different techniques and attained the same results each time. All of these tests can also be found in the repository referenced earlier.
+
+\begin{figure}[htp]
+    \centering
+    \centerline{\includegraphics[width=18cm]{simple algo tests.png}}
+    \caption{The curve $\lambda = k$ shows the average recourse per node (with respect to $\pazocal A_1$ on the left and $\pazocal A_2$ on the right) over many randomly generated insertion sequences of length exactly $\lambda n$ on randomly generated DAGs with $n$ nodes.}
+    \label{fig:recoursetests1}
+\end{figure}
 
 \end{document}

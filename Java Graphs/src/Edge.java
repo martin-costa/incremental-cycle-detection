@@ -9,6 +9,10 @@ public class Edge {
     this.r = r;
   }
 
+  public boolean equals(Object e) {
+    return (l == ((Edge)e).l && r == ((Edge)e).r);
+  }
+
   public String toString() {
     return "(" + Integer.toString(l) + "," + Integer.toString(r) + ")";
   }

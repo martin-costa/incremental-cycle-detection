@@ -1,4 +1,4 @@
 cd src
-javac -d ../bin Test2.java
+javac -d ../bin Results.java
 read args
-java -cp ../bin Test2 $args
+java -cp ../bin Results $args

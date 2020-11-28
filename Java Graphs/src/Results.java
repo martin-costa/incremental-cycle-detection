@@ -1,176 +1,114 @@
 import java.util.*;
 
 // run tests from here
-class Test {
+class Results {
 
   // main method
   public static void main(String args[]) {
 
-    int n = 250;
+    int n = 1100;
 
-    int runs = 10;
+    int lambda = 25;
 
-    int ii = 32;
+    int runs = 3;
+    int runs2 = 2;
+    int totalRuns = 0;
 
-    double c = 6;
+    double c = 3;
 
     double totalEdges = 0;
 
-    double totalRec = 0;
+    double totalRecA1 = 0;
+    double totalRecA2 = 0;
+    double totalRecD = 0;
 
-    double totAv = 0;
+    for (int l = 0; l < 6; l++) {
+      for (int j = 0; j < runs2; j++) {
 
-    double p = 2*c/(n-1);
+        Graph G = Graph.generateDAG(n + l*100, lambda);
+        ArrayList<Edge> edges = G.getEdges();
 
-    double avDepth = 0;
+        // System.out.print("density: ");
+        // System.out.println(G.M()/(0.5*(n-1)*n));
+        //
+        // System.out.print("average degree: ");
+        // System.out.println(2*G.M()/n);
 
-    double avl2 = 0;
+        for (int i = 0; i < runs; i++) {
 
-    int l = 1;
-    int t = 0;
+          Collections.shuffle(edges);
 
-    double[] phi = new double[n];
+          SimpleSearch A1 = new SimpleSearch(n + l*100);
+          A1.setOneWay();
 
-    //int[] counts = new int[n*n];
+          SimpleSearch A2 = new SimpleSearch(n + l*100);
+          A2.setGreedy();
 
-    //double[] ratios = new double[n*n];
+          DivideAndConquer D = new DivideAndConquer(n + l*100);
 
-    while(l++ < 300) {
+          for (Edge e : edges) {
 
-      Graph Ge = Graph.generateGraph(n, p);
+            A1.insert(e.l, e.r);
+            A2.insert(e.l, e.r);
+            D.insert(e.l, e.r);
 
-      ArrayList<Edge> E = Ge.getEdges();
-
-      Collections.shuffle(E);
-
-      //System.out.println(Arrays.toString(ratios));
-
-      SimpleSearch D = new SimpleSearch(n);
-      D.setOneWay();
-      D.G = Ge;
-      D.tracedNode = Ge.getDAGRoot();
-
-      ArrayList<Integer> order = D.getOrdering();
-
-      int pos = order.indexOf(D.tracedNode);
-
-      order.set(pos, order.get(0));
-      order.set(0, D.tracedNode);
-
-      D.updatePotential();
-
-      int insertions = 0;
-      int crits = 0;
-
-      phi[0] += D.phi;
-
-      for (Edge e : E) {
-        D.insert(e);
-
-        if (D.rightCritical > crits) {
-          crits++;
-          phi[crits] += D.phi;
-          //counts[insertions]++;
-        }
-        insertions++;
-      }
-
-      t += D.rightCritical;
-
-      //System.out.println(t/l);
-    }
-
-    // for (int i = 0; i < n*n; i++) {
-    //   ratios[i] = counts[i]/(double)(l);
-    // }
-
-    for (int i = 0; i < n; i++) {
-      phi[i] = phi[i]/(double)(l-2);
-    }
-
-    //System.out.println(toString(ratios));
-    System.out.println(toString(phi));
-
-
-
-    for (int i = 0; i < runs; i++) {
-
-      Graph G = Graph.generateGraph(n, p);
-
-      ArrayList<Edge> edges = G.getEdges();
-
-      //System.out.print("density*n: ");
-      //System.out.println(G.M()/ (0.5*(n-1)));
-
-      SimpleSearch D = new SimpleSearch(n);
-      D.G = G;
-      D.setOneWay();
-      //DivideAndConquer D = new DivideAndConquer(n);
-
-      //System.out.println(totalEdges/(i + 1));
-
-      HashSet<Edge> added = new HashSet<Edge>();
-
-      ArrayList<Integer> order = D.getOrdering();
-
-      //System.out.println(D);
-
-      for (Edge e : edges) {
-        //System.out.println(e);
-        //System.out.println(added.size());
-        // System.out.print("   ");
-        // System.out.print(D.totalRecourse);
-        // System.out.print("\n");
-        D.insert(e.l, e.r);
-        added.add(e);
-        //System.out.println(D);
-
-        order = D.getOrdering();
-        //System.out.println(order);
-        for (Edge f : added) {
-          if (order.indexOf(f.l) >= order.indexOf(f.r)) {
-            System.out.println("AHHHHHHHHHHHHHHHHHHHHHHH");
-            //System.out.println(edges);
-            i = 10000000;
+            // for (Edge f : added) {
+            //   if (order.indexOf(f.l) >= order.indexOf(f.r)) {
+            //     System.out.println("<<< CYCLE DETECTED >>>");
+            //     //System.out.println(edges);
+            //     i = runs;
+            //   }
+            // }
           }
+
+          totalRuns++;
+
+          totalRecA1 += A1.getTotalRecourse();
+          totalRecA2 += A2.getTotalRecourse();
+          totalRecD += D.totalRecourse;
         }
       }
 
-      totalEdges += edges.size();
+      System.out.println(n+l*100);
+      System.out.println("rec is:");
+      System.out.print(totalRecA1/(totalRuns));
+      System.out.print("  ");
+      System.out.print(totalRecA2/(totalRuns));
+      System.out.print("  ");
+      System.out.print(totalRecD/(totalRuns));
+      System.out.println("");
 
-      //avDepth += D.depth();
+      totalRuns=0;
 
-      totalRec += D.getTotalRecourse();
-
-      double avRec = totalRec/(i+1);
-      double avEdg = totalEdges/(i+1);
-
-      totAv += (double)D.getTotalRecourse()/(double)n;
-
-      System.out.println(totAv/(i+1));
+      totalRecA1=0;
+      totalRecA2=0;
+      totalRecD=0;
     }
   }
 
-  private static String toString(double array[]) {
-    return toString(array, Locale.ENGLISH, "%.5f");
-  }
-
-  private static String toString(double array[], Locale locale, String format) {
-
-    if (array == null) return "null";
-
-    StringBuilder sb = new StringBuilder("[");
-
-    for (int i=0; i<array.length; i++) {
-
-      if (i > 0) sb.append(", ");
-
-      sb.append(String.format(locale, format, array[i]));
+  private static String toString(double array[])
+    {
+        return toString(array, Locale.ENGLISH, "%.5f");
     }
 
-    sb.append("]");
-    return sb.toString();
-  }
+    private static String toString(double array[], Locale locale, String format)
+    {
+        if (array == null)
+        {
+            return "null";
+        }
+        StringBuilder sb = new StringBuilder("[");
+        for (int i=0; i<array.length; i++)
+        {
+            if (i > 0)
+            {
+                sb.append(", ");
+            }
+            sb.append(String.format(locale, format, array[i]));
+        }
+        sb.append("]");
+        return sb.toString();
+    }
 
   // test different simple algorithms on random DAGs
   public static void testSimpleSearch(int n, int runs) {

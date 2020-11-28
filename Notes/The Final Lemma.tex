@@ -1,0 +1,58 @@
+\documentclass{article}
+
+% packages
+\usepackage[utf8]{inputenc}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{graphicx}
+\usepackage[margin=1.4in]{geometry}
+\usepackage{xcolor}
+
+\usepackage{calrsfs}
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+
+% definitions and commands
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\DeclareMathOperator*{\polylog}{polylog}
+
+\title{Upper Bounds on Expected Recourse of Incremental Cycle Detection Algorithms (Draft 2)}
+\author{Martin Costa}
+\date{August 2020}
+
+\begin{document}
+
+\section{The Idea}
+
+The idea here stems from our discussion on Monday about how we can bypass the need for the other lemmas by using randomization.
+
+We know that if we have $k$ critical edges, and the next insertion is critical, then we expect half of these edges to no longer be critical afterward. The issue here is that it's possible that all these critical edges are `tightly packed' at the front of the ordering. We know that by simply randomizing the ordering we can prevent this from happening and they will be very randomly distributed.
+
+I claim that randomizing the initial ordering causes critical insertions to be `randomly distributed forever', in other words, we can deduce that the critical edges can never be 'tightly packed together' at the front of the ordering. Remarkably, we do not even require random-order arrival for this to be true. We prove this by induction.
+
+\section{The Lemma}
+
+Let $G=(V,E)$ be a DAG with root $r$. 
+
+\begin{definition} Let $\pazocal E$ be an insertion sequence of $G$ and let $\prec$ be an ordering of $G$ such that $\prec \: \sim (u_1,...,u_n)$. Then given some $x \in V$, $k \in [n]$, we denote by $\Phi_x(\pazocal E, \prec, k)$ the average index of the startpoint of the edges that are critical to $x$ whose startpoint has an index $\geq k$.
+\end{definition}
+
+\begin{lemma} Let $\pazocal E$ be an insertion sequence of $G$, $x \in V$, $t \in \{0,...,m-1\}$ and $k \in [n]$. Then we have that
+\[ \mathbb E_{\prec_0 \in \mathcal S_V}[\Phi_x(\pazocal E, \prec_t, k)] \geq \frac{n+k}{2} \]
+\end{lemma}
+
+% By setting $k$ equal to the index of $x$, this Lemma tells us that at any point during the run of $\pazocal A_1$ on $\pazocal E$, we have that we expect a random critical insertion of $x$ to cause the amount of nodes on the right of $x$ to at least half. This is exactly the kind of argument we can adapt to obtain a restricted version of Lemma 2 for the setting we care about.
+
+% \begin{corollary} Let $\pazocal E$ be an insertion sequence of $G$, $x \in V$, $t \in \{0,...,m-1\}$ and let $k$ be the index of $x$ in $\prec_t$. Then we have that
+% \[ \mathbb E_{\prec_0 \in \mathcal S_V}[\Phi_x(\pazocal E, \prec_t, k)] \geq \frac{n+k}{2} \]
+% \end{corollary}
+
+\end{document}

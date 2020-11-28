@@ -9,6 +9,7 @@
 \usepackage{amssymb}
 \usepackage{enumerate}
 \usepackage{dsfont}
+\usepackage[margin=1.4in]{geometry}
 
 \usepackage{calrsfs}
 \DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
@@ -22,11 +23,6 @@
 \newtheorem{definition}[theorem]{Definition}
 
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
-
-\voffset = -20pt % defaults to 0pt
-\textheight = 581pt % defaults to 561pt
-\hoffset = -10pt % defaults to 0pt
-\textwidth = 375pt % defaults to 355pt
 
 \title{- CS344 Discrete Mathematics Project - \\  Incremental Cycle Detection \& Topological Ordering}
 \author{Martin Costa}
@@ -56,8 +52,5 @@ The fact that a graph $G$ admits a topological ordering of it's nodes if and onl
 It should then be no surprise that the problems of incremental cycle detection and incremental topological ordering are also deeply connected, and that incremental cycle detection can also be reduced to incremental topological ordering, with the same caveat as before. Because of this, every well known algorithm for incremental cycle detection relies on an algorithm for incremental topological ordering.
 
 \section{Problem Statement}
-
-
-
 
 \end{document}
